@@ -76,9 +76,9 @@ class AdminTeamController extends BaseApiController {
                 if (reqQuery.limit) limit = Number(reqQuery.limit);
                 if (reqQuery.page) page = Number(reqQuery.page);
 
-                const tasks = await teamRepository.paginate(query, limit, page);
+                const teams = await teamRepository.paginate(query, limit, page);
         
-                this.sendSuccessResponse(res, tasks);
+                this.sendSuccessResponse(res, teams);
             } catch (error:any) {
                 this.sendErrorResponse(res, error, UNABLE_TO_COMPLETE_REQUEST, 500) 
             }
