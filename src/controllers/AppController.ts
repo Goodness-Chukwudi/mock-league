@@ -1,12 +1,14 @@
 import BaseApiController from "./base controllers/BaseApiController";
 import { UNABLE_TO_COMPLETE_REQUEST } from "../common/constant/error_response_message";
-import { BIT, PASSWORD_STATUS } from "../data/enums/enum";
+import { BIT, FIXTURE_STATUS, PASSWORD_STATUS } from "../data/enums/enum";
 import { USER_PASSWORD_LABEL } from "../common/constant/app_constants";
 import { createMongooseTransaction } from "../common/utils/app_utils";
 import AppValidator from "../middlewares/validators/AppValidator";
 import { PASSWORD_UPDATE_SUCCESSFUL } from "../common/constant/success_response_message";
 import { passwordRepository } from "../services/password_service";
 import { userService } from "../services/user_service";
+import { teamRepository } from "../services/team_service";
+import { fixtureRepository } from "../services/fixture_service";
 
 class AppController extends BaseApiController {
     private appValidator: AppValidator;
@@ -22,9 +24,65 @@ class AppController extends BaseApiController {
     }
 
     protected initializeRoutes() {
+        this.listTeams("/teams-list"); //GET
+        this.listCompletedFixtures("/fixtures/completed"); //GET
+        this.listPendingFixtures("/fixtures/pending"); //GET
         this.me("/me"); //GET
         this.logout("/logout"); //PATCH
         this.updatePassword("/password"); //PATCH
+    }
+
+    listTeams(path:string) {
+        this.router.get(path, async (req, res) => {
+            try {
+                let limit;
+                let page;
+                if (req.query.limit) limit = Number(req.query.limit);
+                if (req.query.page) page = Number(req.query.page);
+
+                const teams = await teamRepository.paginate({}, limit, page);
+        
+                this.sendSuccessResponse(res, teams);
+            } catch (error:any) {
+                this.sendErrorResponse(res, error, UNABLE_TO_COMPLETE_REQUEST, 500) 
+            }
+        });
+    }
+
+    listPendingFixtures(path:string) {
+        this.router.get(path, async (req, res) => {
+            try {
+                const query = {status: FIXTURE_STATUS.PENDING};
+                let limit;
+                let page;
+                if (req.query.limit) limit = Number(req.query.limit);
+                if (req.query.page) page = Number(req.query.page);
+
+                const fixtures = await fixtureRepository.paginate(query, limit, page);
+        
+                this.sendSuccessResponse(res, fixtures);
+            } catch (error:any) {
+                this.sendErrorResponse(res, error, UNABLE_TO_COMPLETE_REQUEST, 500) 
+            }
+        });
+    }
+
+    listCompletedFixtures(path:string) {
+        this.router.get(path, async (req, res) => {
+            try {
+                const query = {status: FIXTURE_STATUS.COMPLETED};
+                let limit;
+                let page;
+                if (req.query.limit) limit = Number(req.query.limit);
+                if (req.query.page) page = Number(req.query.page);
+
+                const fixtures = await fixtureRepository.paginate(query, limit, page);
+        
+                this.sendSuccessResponse(res, fixtures);
+            } catch (error:any) {
+                this.sendErrorResponse(res, error, UNABLE_TO_COMPLETE_REQUEST, 500) 
+            }
+        });
     }
 
     me(path:string) {

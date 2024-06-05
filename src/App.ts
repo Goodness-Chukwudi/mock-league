@@ -2,13 +2,13 @@ import express, { Express } from "express";
 import helmet from "helmet";
 import compression from "compression"
 import AppRoutes from "./routes/AppRoutes";
-import AuthController from "./controllers/AuthController";
 import AuthMiddleware from "./middlewares/AuthMiddleware";
 import Env from "./common/config/environment_variables";
 import corsSettings from "./common/utils/cors";
 import AdminRoutes from "./routes/AdminRoutes";
 import responseTime from "response-time";
 import { recordResponseTime } from "./common/utils/app_utils";
+import PublicController from "./controllers/PublicController";
 
 class App {
 
@@ -47,7 +47,7 @@ class App {
 
       
       //load public/non secured routes
-      this.app.use(Env.API_PATH + "/auth", AuthController);
+      this.app.use(Env.API_PATH, PublicController);
       
       //  Load Authentication MiddleWare. Routes after this are protected
       this.app.use(Env.API_PATH, this.authMiddleware.authGuard);

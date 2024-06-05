@@ -5,8 +5,11 @@ import AppValidator from "../middlewares/validators/AppValidator";
 import { userService, userRepository } from "../services/user_service";
 import { passwordRepository } from "../services/password_service";
 import { createMongooseTransaction } from "../common/utils/app_utils";
+import { getEndOfDay, getStartOfDay } from "../common/utils/date_utils";
+import { teamRepository } from "../services/team_service";
+import { fixtureRepository } from "../services/fixture_service";
 
-class AuthController extends BaseApiController {
+class PublicController extends BaseApiController {
 
     appValidator: AppValidator;
 
@@ -23,6 +26,8 @@ class AuthController extends BaseApiController {
     protected initializeRoutes() {
         this.login("/login"); //POST
         this.signup("/signup"); //POST
+        this.searchTeams("/teams"); //GET
+        this.searchFixtures("/fixtures"); //GET
     }
 
     signup(path:string) {
@@ -85,6 +90,71 @@ class AuthController extends BaseApiController {
             }
         });
     }
+
+    searchTeams(path:string) {
+        this.router.get(path, async (req, res) => {
+            try {
+                const reqQuery: Record<string, any> = req.query;
+                let query = {};
+
+                if (reqQuery.status) query = {...query, status: reqQuery.status};
+                if (reqQuery.added_by) query = {...query, added_by: reqQuery.added_by};
+                if (reqQuery.start_date && reqQuery.end_date) {
+                    const startDate = getStartOfDay(reqQuery.start_date)
+                    const endDate = getEndOfDay(reqQuery.end_date)
+                    query = {...query, created_at: { $gte: startDate, $lte: endDate }}
+                }
+                if (reqQuery.search) query = {
+                    ...query,
+                    $or: [
+                        {name: new RegExp(`${req.query.search}`, "i")},
+                        {slogan: new RegExp(`${req.query.search}`, "i")},
+                        {stadium: new RegExp(`${req.query.search}`, "i")}
+                    ]
+                };
+
+
+                let limit;
+                let page;
+                if (reqQuery.limit) limit = Number(reqQuery.limit);
+                if (reqQuery.page) page = Number(reqQuery.page);
+
+                const teams = await teamRepository.paginate(query, limit, page);
+        
+                this.sendSuccessResponse(res, teams);
+            } catch (error:any) {
+                this.sendErrorResponse(res, error, UNABLE_TO_COMPLETE_REQUEST, 500) 
+            }
+        });
+    }
+
+    searchFixtures(path:string) {
+        this.router.get(path, async (req, res) => {
+            try {
+                const reqQuery: Record<string, any> = req.query;
+                let query = {};
+
+                if (reqQuery.status) query = {...query, status: reqQuery.status};
+                if (reqQuery.added_by) query = {...query, added_by: reqQuery.added_by};
+                if (reqQuery.start_date && reqQuery.end_date) {
+                    const startDate = getStartOfDay(reqQuery.start_date)
+                    const endDate = getEndOfDay(reqQuery.end_date)
+                    query = {...query, kick_off: { $gte: startDate, $lte: endDate }}
+                }
+
+                let limit;
+                let page;
+                if (reqQuery.limit) limit = Number(reqQuery.limit);
+                if (reqQuery.page) page = Number(reqQuery.page);
+
+                const fixtures = await fixtureRepository.paginate(query, limit, page);
+        
+                this.sendSuccessResponse(res, fixtures);
+            } catch (error:any) {
+                this.sendErrorResponse(res, error, UNABLE_TO_COMPLETE_REQUEST, 500) 
+            }
+        });
+    }
 }
 
-export default new AuthController().router;
+export default new PublicController().router;

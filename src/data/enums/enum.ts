@@ -38,9 +38,10 @@ const TEAM_STATUS = Object.freeze({
 });
 
 const FIXTURE_STATUS = Object.freeze({
+    PENDING: "pending",
+    COMPLETED: "completed",
     UPCOMING: "upcoming",
     IN_PROGRESS: "in-progress",
-    PLAYED: "played",
     OUTSTANDING: "outstanding",
     DELAYED: "delayed",
     CANCELLED: "cancelled",
