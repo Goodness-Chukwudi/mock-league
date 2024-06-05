@@ -83,7 +83,7 @@ class AppController extends BaseApiController {
                 await userService.logoutUser(user.id);
                 const token = await userService.loginUser(user.id);
         
-                this.sendSuccessResponse(res, {message: PASSWORD_UPDATE_SUCCESSFUL, token: token}, session);
+                this.sendSuccessResponse(res, {message: PASSWORD_UPDATE_SUCCESSFUL, token: token}, 200, session);
             } catch (error:any) {
                 this.sendErrorResponse(res, error, UNABLE_TO_COMPLETE_REQUEST, 500, session) 
             }

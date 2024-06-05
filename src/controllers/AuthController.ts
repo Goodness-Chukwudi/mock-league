@@ -54,7 +54,7 @@ class AuthController extends BaseApiController {
                     user: user
                 }
 
-                return this.sendSuccessResponse(res, response, session, 201);
+                return this.sendSuccessResponse(res, response, 201, session);
             } catch (error:any) {
                 this.sendErrorResponse(res, error, UNABLE_TO_COMPLETE_REQUEST, 500, session);
             }

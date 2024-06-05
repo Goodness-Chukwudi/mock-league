@@ -7,7 +7,6 @@ const ObjectId = Types.ObjectId;
 
 const TeamSchema = new Schema<Record<keyof ICreateTeam, any>>({
     name: { type: String, required: true, unique: true, index: true},
-    logo_url: {type: String, required: true},
     slogan: {type: String, required: true},
     stadium: {type: String, required: true, unique: true},
     added_by: { type: ObjectId, required: true, ref: MODEL_NAMES.USER},
@@ -19,7 +18,6 @@ const TeamSchema = new Schema<Record<keyof ICreateTeam, any>>({
 
 interface ICreateTeam {
     name: string;
-    logo_url: string;
     slogan: string;
     stadium: string;
     added_by: string | IUserDocument

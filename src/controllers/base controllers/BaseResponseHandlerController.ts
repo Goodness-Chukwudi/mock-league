@@ -47,7 +47,7 @@ abstract class BaseResponseHandler {
      * @param {number} statusCode HTTP status code of the success response
      * @returns  void
     */
-    protected async sendSuccessResponse(res: Response, data:any = null, session?: ClientSession, statusCode = 200) {
+    protected async sendSuccessResponse(res: Response, data:any = null, statusCode = 200, session?: ClientSession) {
         if (session) await session.commitTransaction();
         const response = {
             success: true,
