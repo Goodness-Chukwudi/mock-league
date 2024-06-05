@@ -3,7 +3,7 @@ import { PASSWORD_STATUS } from "../data/enums/enum";
 import MODEL_NAMES from "../data/model_names";
 import { IUserDocument } from "./user";
 
-const ObjectId = Schema.Types.ObjectId;
+const ObjectId = Types.ObjectId;
 
 const UserPasswordSchema = new Schema<Record<keyof IUserPassword, any>>({
     password: {type: String, required: true},

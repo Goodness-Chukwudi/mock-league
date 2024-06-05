@@ -13,14 +13,14 @@ const schemaFields: Record<keyof Omit<IUser, "full_name" | "phone_with_country_c
     gender: {type: String, lowercase: true, required: [true, "gender is required"], enum: Object.values(GENDER)},
     status: {type: String, enum: Object.values(ITEM_STATUS), default: ITEM_STATUS.ACTIVE}
 }
+
 const UserSchema = new Schema(
     schemaFields,
     {
         toObject: { virtuals: true },
         toJSON: { virtuals: true },
         timestamps: {createdAt: 'created_at', updatedAt: 'updated_at'}
-    })
-;
+    });
 
 UserSchema.virtual('full_name').get(function() {
     if (this.middle_name)

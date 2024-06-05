@@ -29,10 +29,30 @@ const USER_ROLES = Object.freeze({
     SUPER_ADMIN: "super-admin"
 });
 
+const TEAM_STATUS = Object.freeze({
+    ACTIVE: "active",
+    IN_ACTIVE: "in-active",
+    RELEGATED: "relegated",
+    SUSPENDED: "suspended",
+    BANNED: "banned"
+});
+
+const FIXTURE_STATUS = Object.freeze({
+    UPCOMING: "upcoming",
+    IN_PROGRESS: "in-progress",
+    PLAYED: "played",
+    OUTSTANDING: "outstanding",
+    DELAYED: "delayed",
+    CANCELLED: "cancelled",
+    POSTPONED: "postponed"
+});
+
 export {
     GENDER,
     BIT,
     PASSWORD_STATUS,
     ITEM_STATUS,
-    USER_ROLES
+    USER_ROLES,
+    TEAM_STATUS,
+    FIXTURE_STATUS
 }

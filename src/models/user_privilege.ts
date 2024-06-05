@@ -4,7 +4,7 @@ import MODEL_NAMES from "../data/model_names";
 import { IUserDocument } from "./user";
 import mongoosePagination from "mongoose-paginate-v2";
 
-const ObjectId = Schema.Types.ObjectId;
+const ObjectId = Types.ObjectId;
 
 const UserPrivilegeSchema = new Schema<Record<keyof IUserPrivilege, any>>({
     user: { type: ObjectId, ref: MODEL_NAMES.USER, required: true},

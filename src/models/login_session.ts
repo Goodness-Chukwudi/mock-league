@@ -3,7 +3,7 @@ import { BIT } from "../data/enums/enum";
 import MODEL_NAMES from "../data/model_names";
 import { IUserDocument } from "./user";
 
-const ObjectId = Schema.Types.ObjectId;
+const ObjectId = Types.ObjectId;
 
 const LoginSessionSchema = new Schema<Record<keyof ILoginSession, any>>({
     user: { type: ObjectId, required: true, ref: MODEL_NAMES.USER},
