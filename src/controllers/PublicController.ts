@@ -5,7 +5,6 @@ import AppValidator from "../middlewares/validators/AppValidator";
 import { userService, userRepository } from "../services/user_service";
 import { passwordRepository } from "../services/password_service";
 import { createMongooseTransaction } from "../common/utils/app_utils";
-import { getEndOfDay, getStartOfDay } from "../common/utils/date_utils";
 import { teamRepository } from "../services/team_service";
 import { fixtureRepository } from "../services/fixture_service";
 
@@ -96,14 +95,6 @@ class PublicController extends BaseApiController {
             try {
                 const reqQuery: Record<string, any> = req.query;
                 let query = {};
-
-                if (reqQuery.status) query = {...query, status: reqQuery.status};
-                if (reqQuery.added_by) query = {...query, added_by: reqQuery.added_by};
-                if (reqQuery.start_date && reqQuery.end_date) {
-                    const startDate = getStartOfDay(reqQuery.start_date)
-                    const endDate = getEndOfDay(reqQuery.end_date)
-                    query = {...query, created_at: { $gte: startDate, $lte: endDate }}
-                }
                 if (reqQuery.search) query = {
                     ...query,
                     $or: [
@@ -112,7 +103,6 @@ class PublicController extends BaseApiController {
                         {stadium: new RegExp(`${req.query.search}`, "i")}
                     ]
                 };
-
 
                 let limit;
                 let page;
@@ -133,14 +123,15 @@ class PublicController extends BaseApiController {
             try {
                 const reqQuery: Record<string, any> = req.query;
                 let query = {};
-
-                if (reqQuery.status) query = {...query, status: reqQuery.status};
-                if (reqQuery.added_by) query = {...query, added_by: reqQuery.added_by};
-                if (reqQuery.start_date && reqQuery.end_date) {
-                    const startDate = getStartOfDay(reqQuery.start_date)
-                    const endDate = getEndOfDay(reqQuery.end_date)
-                    query = {...query, kick_off: { $gte: startDate, $lte: endDate }}
-                }
+                if (reqQuery.search) query = {
+                    ...query,
+                    $or: [
+                        {"home_team.name": new RegExp(`${req.query.search}`, "i")},
+                        {"away_team.name": new RegExp(`${req.query.search}`, "i")},
+                        {venue: new RegExp(`${req.query.search}`, "i")},
+                        {referee: new RegExp(`${req.query.search}`, "i")}
+                    ]
+                };
 
                 let limit;
                 let page;

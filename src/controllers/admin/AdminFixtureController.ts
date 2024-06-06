@@ -33,12 +33,24 @@ class AdminFixtureController extends BaseApiController {
             try {
                 const user = this.requestUtils.getRequestUser();
                 const body = req.body;
-                
+
+                const homeTeam = await teamRepository.findById(body.home_team);
+                if (!homeTeam) {
+                    const error = new Error("Home team not found");
+                    return this.sendErrorResponse(res, error, resourceNotFound("Home team"), 404);
+                }
+
+                const awayTeam = await teamRepository.findById(body.away_team);
+                if (!awayTeam) {
+                    const error = new Error("Away team not found");
+                    return this.sendErrorResponse(res, error, resourceNotFound("Away team"), 404);
+                }
+ 
                 const fixtureData = {
                     venue: body.venue,
                     kick_off: body.kick_off,
-                    home_team: body.home_team,
-                    away_team: body.away_team,
+                    home_team: { name: homeTeam.name, team: homeTeam.id },
+                    away_team: { name: awayTeam.name, team: awayTeam.id },
                     referee: body.referee,
                     created_by: user.id
                 };
@@ -82,7 +94,13 @@ class AdminFixtureController extends BaseApiController {
     viewFixture(path:string) {
         this.router.get(path, async (req, res) => {
             try {
-                const fixture = await fixtureRepository.findById(req.params.id);
+                const populatedFields = [
+                    { path: "home_team", select: "team score" },
+                    { path: "away_team", select: "team score" },
+                    { path: "created_by", select: "first_name middle_name last_name" }
+                ];
+
+                const fixture = await fixtureRepository.findByIdAndPopulate(req.params.id, populatedFields);
                 if (!fixture) {
                     const error = new Error("Fixture not found");
                     return this.sendErrorResponse(res, error, resourceNotFound("Fixture"), 404) 
@@ -106,8 +124,8 @@ class AdminFixtureController extends BaseApiController {
                     referee: body.referee,
                     time_started: body.time_started, 
                     time_ended: body.time_ended,
-                    home_team_score: body.home_team_score,
-                    away_team_score: body.away_team_score,
+                    "home_team.score": body.home_team_score,
+                    "away_team.score": body.away_team_score,
                     status: body.status
                 }
                 const updatedFixture = await teamRepository.updateById(req.params.id, update);

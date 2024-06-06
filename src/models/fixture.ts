@@ -6,15 +6,20 @@ import { ITeamDocument } from "./team";
 
 const ObjectId = Types.ObjectId;
 
+const Team = {
+    name: {type: String, required: true, index: true},//team's name field is added and indexed to improve search
+    score: {type: Number},
+    team: {type: ObjectId, required: true, ref: MODEL_NAMES.TEAM}
+};
+
 const FixtureSchema = new Schema<Record<keyof ICreateFixture, any>>({
     venue: { type: String, required: true},
     kick_off: {type: Date, required: true}, //supposed kickoff date and time
     time_started: {type: Date}, 
     time_ended: {type: Date},
-    home_team_score: {type: Number, required: true},
-    away_team_score: {type: Number, required: true},
-    home_team: {type: ObjectId, required: true, ref: MODEL_NAMES.TEAM},
-    away_team: {type: ObjectId, required: true, ref: MODEL_NAMES.TEAM},
+    home_team: Team,
+    away_team: Team,
+    url: {type: String, default: ""},
     referee: {type: String, required: true},
     created_by: { type: ObjectId, required: true, ref: MODEL_NAMES.USER},
     status: {type: String, enum: Object.values(FIXTURE_STATUS), default: FIXTURE_STATUS.UPCOMING}
@@ -28,10 +33,17 @@ interface ICreateFixture {
     kick_off: Date;
     time_started?: Date;
     time_ended?: Date;
-    home_team_score?: number;
-    away_team_score?: number;
-    home_team: string | ITeamDocument;
-    away_team: string | ITeamDocument;
+    home_team: {
+        name: string;
+        score?: number;
+        team: string | ITeamDocument;
+    };
+    away_team: {
+        name: string;
+        score?: number;
+        team: string | ITeamDocument;
+    };
+    url?: string;
     referee: string;
     created_by: string | IUserDocument;
     status?: string;

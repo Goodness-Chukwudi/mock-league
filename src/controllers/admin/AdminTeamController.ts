@@ -88,7 +88,11 @@ class AdminTeamController extends BaseApiController {
     viewTeam(path:string) {
         this.router.get(path, async (req, res) => {
             try {
-                const team = await teamRepository.findById(req.params.id);
+                const populatedFields = [
+                    { path: "created_by", select: "first_name middle_name last_name" }
+                ];
+
+                const team = await teamRepository.findByIdAndPopulate(req.params.id, populatedFields);
                 if (!team) {
                     const error = new Error("Team not found");
                     return this.sendErrorResponse(res, error, resourceNotFound("Team"), 404) 
