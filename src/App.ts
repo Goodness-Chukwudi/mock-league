@@ -10,6 +10,7 @@ import responseTime from "response-time";
 import { recordResponseTime } from "./common/utils/app_utils";
 import PublicController from "./controllers/PublicController";
 import { returnHtmlForUniqueFixtureLink } from "./services/fixture_service";
+import { redisSessionStore } from "./common/utils/redis";
 
 class App {
 
@@ -24,14 +25,14 @@ class App {
       this.plugInRoutes();
     }
 
-    private plugInMiddlewares() {
+    private async plugInMiddlewares() {
       this.app.use(express.json());
       this.app.use(express.urlencoded({ extended: false }));
+      this.app.use(redisSessionStore());
       this.app.use(corsSettings);
       this.app.use(helmet());
       this.app.use(compression());
       this.app.use(responseTime(recordResponseTime));
-
     }
     
     private plugInRoutes() {
@@ -47,7 +48,6 @@ class App {
         res.status(200).send(response);
       });
 
-      
       //load public/non secured routes
       this.app.use(Env.API_PATH, PublicController);
       
@@ -60,7 +60,6 @@ class App {
 
       //return a 404 for unspecified/unmatched routes
       this.app.all("*", (req, res) => res.status(404).send("RESOURCE NOT FOUND"));
-      
     }
 }
 

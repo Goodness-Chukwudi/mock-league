@@ -15,6 +15,9 @@ function validateEnvironmentVariables() {
             MONGODB_URI: Joi.string().required(),
             JWT_PRIVATE_KEY: Joi.string().required(),
             JWT_EXPIRY: Joi.string().required(),
+            REDIS_PASSWORD: Joi.string().required(),
+            REDIS_HOST: Joi.string().required(),
+            REDIS_PORT:Joi.number().required(),
         });
         
         const response = EnvSchema.validate(Env);

@@ -83,6 +83,14 @@ class PublicController extends BaseApiController {
                     user: user
                 }
 
+                console.log(req.session);
+
+                req.session.user_id = user.id;
+                req.session.user_name = user.full_name;
+                req.session.user_email = user.email;
+
+                // console.log(req.session)
+
                 return this.sendSuccessResponse(res, response);
             } catch (error:any) {
                 this.sendErrorResponse(res, error, UNABLE_TO_LOGIN, 500);
