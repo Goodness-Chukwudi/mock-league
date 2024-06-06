@@ -6,6 +6,7 @@ interface IEnv {
     ALLOWED_ORIGINS: string[];
     API_VERSION: string;
     API_PATH: string;
+    APP_URL: string;
     MONGODB_URI: string;
     JWT_PRIVATE_KEY: string;
     JWT_EXPIRY: string;
@@ -18,6 +19,7 @@ const Env: IEnv = {
     ALLOWED_ORIGINS: process.env.ALLOWED_ORIGINS?.split(", ") as string[],
     API_VERSION: process.env.API_VERSION as string,
     API_PATH: "/api/" + process.env.API_VERSION,
+    APP_URL: process.env.APP_URL as string,
     JWT_PRIVATE_KEY: process.env.JWT_PRIVATE_KEY as string,
     JWT_EXPIRY: process.env.JWT_EXPIRY as string,
     MONGODB_URI: process.env.MONGODB_URI as string,

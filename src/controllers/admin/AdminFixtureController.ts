@@ -5,6 +5,8 @@ import { UNABLE_TO_COMPLETE_REQUEST, resourceNotFound } from "../../common/const
 import { teamRepository } from "../../services/team_service";
 import FixtureValidator from "../../middlewares/validators/FixtureValidator";
 import { fixtureRepository } from "../../services/fixture_service";
+import { nanoid } from "nanoid";
+import Env from "../../common/config/environment_variables";
 
 class AdminFixtureController extends BaseApiController {
     private fixtureValidator: FixtureValidator;
@@ -25,6 +27,7 @@ class AdminFixtureController extends BaseApiController {
         this.viewFixture("/:id"); //GET
         this.removeFixture("/:id"); //DELETE
         this.updateFixture("/:id"); //PATCH
+        this.generateFixtureUrl("/:id"); //POST
     }
 
     addFixture(path:string) {
@@ -128,7 +131,7 @@ class AdminFixtureController extends BaseApiController {
                     "away_team.score": body.away_team_score,
                     status: body.status
                 }
-                const updatedFixture = await teamRepository.updateById(req.params.id, update);
+                const updatedFixture = await fixtureRepository.updateById(req.params.id, update);
 
                 if (!updatedFixture) {
                     const error = new Error("Fixture not found");
@@ -136,6 +139,26 @@ class AdminFixtureController extends BaseApiController {
                 }
 
                 this.sendSuccessResponse(res, updatedFixture);
+            } catch (error:any) {
+                this.sendErrorResponse(res, error, UNABLE_TO_COMPLETE_REQUEST, 500);
+            }
+        });
+    }
+
+    generateFixtureUrl(path:string) {
+        this.router.post(path, async (req, res) => {
+            try {
+                const id = nanoid(); //uniques 21 digits string     
+                const fixtureLink = `${Env.APP_URL}/${id}`;
+                
+                const updatedFixture = await fixtureRepository.updateById(req.params.id, {url_id: id});
+
+                if (!updatedFixture) {
+                    const error = new Error("Fixture not found");
+                    return this.sendErrorResponse(res, error, resourceNotFound("Fixture"), 404) 
+                }
+
+                this.sendSuccessResponse(res, fixtureLink);
             } catch (error:any) {
                 this.sendErrorResponse(res, error, UNABLE_TO_COMPLETE_REQUEST, 500);
             }

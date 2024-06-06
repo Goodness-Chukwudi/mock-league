@@ -10,7 +10,7 @@ connectToDB()
   .then(async () => {
     app.listen(Env.PORT, () => {
       if (Env.ENVIRONMENT == ENVIRONMENTS.DEV)
-          console.log(`Express is listening on http://localhost:${Env.PORT}${Env.API_PATH}`);
+        console.log(`Express is listening on ${Env.APP_URL}:${Env.PORT}${Env.API_PATH}`);
     });
     await userService.createSuperAdminUser();
   })

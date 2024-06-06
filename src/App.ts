@@ -9,6 +9,7 @@ import AdminRoutes from "./routes/AdminRoutes";
 import responseTime from "response-time";
 import { recordResponseTime } from "./common/utils/app_utils";
 import PublicController from "./controllers/PublicController";
+import { returnHtmlForUniqueFixtureLink } from "./services/fixture_service";
 
 class App {
 
@@ -39,6 +40,7 @@ class App {
       this.adminRoutes = new AdminRoutes(this.app);
       
       this.app.get("/", (req, res) => res.status(200).send("<h1>Successful</h1>"));
+      this.app.get("/:fixture_url_id", returnHtmlForUniqueFixtureLink);
 
       this.app.get(Env.API_PATH + "/health", (req, res) => {
         const response = "Server is healthy____   " + new Date().toUTCString();

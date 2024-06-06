@@ -11,6 +11,7 @@ function validateEnvironmentVariables() {
             ALLOWED_ORIGINS: Joi.array().items(Joi.string()).min(1).required(),
             API_VERSION: Joi.string().required(),
             API_PATH: Joi.string().required(),
+            APP_URL: Joi.string().required(),
             MONGODB_URI: Joi.string().required(),
             JWT_PRIVATE_KEY: Joi.string().required(),
             JWT_EXPIRY: Joi.string().required(),

@@ -19,7 +19,7 @@ const FixtureSchema = new Schema<Record<keyof ICreateFixture, any>>({
     time_ended: {type: Date},
     home_team: Team,
     away_team: Team,
-    url: {type: String, default: ""},
+    url_id: {type: String, default: "", unique: true},
     referee: {type: String, required: true},
     created_by: { type: ObjectId, required: true, ref: MODEL_NAMES.USER},
     status: {type: String, enum: Object.values(FIXTURE_STATUS), default: FIXTURE_STATUS.UPCOMING}
@@ -43,7 +43,7 @@ interface ICreateFixture {
         score?: number;
         team: string | ITeamDocument;
     };
-    url?: string;
+    url_id?: string;
     referee: string;
     created_by: string | IUserDocument;
     status?: string;
