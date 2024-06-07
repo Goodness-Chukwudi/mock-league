@@ -5,6 +5,7 @@ import { UNABLE_TO_COMPLETE_REQUEST, resourceNotFound } from "../../common/const
 import { teamRepository } from "../../services/team_service";
 import { TEAMS_KEY } from "../../common/constant/app_constants";
 import { deleteCachedData, getCachedData, setCachedData } from "../../common/utils/redis";
+import { createMongooseTransaction } from "../../common/utils/app_utils";
 
 class AdminTeamController extends BaseApiController {
     private teamValidator: TeamValidator;
@@ -30,6 +31,7 @@ class AdminTeamController extends BaseApiController {
     addTeam(path:string) {
         this.router.post(path, this.teamValidator.validateTeam);
         this.router.post(path, async (req, res) => {
+            const session = await createMongooseTransaction();
             try {
                 const user = this.requestUtils.getRequestUser();
                 const body = req.body;
@@ -45,9 +47,9 @@ class AdminTeamController extends BaseApiController {
                 //remove cached data to trigger a refetch from db on next request
                 await deleteCachedData([TEAMS_KEY]);
         
-                this.sendSuccessResponse(res, team, 201);
+                this.sendSuccessResponse(res, team, 201, session);
             } catch (error:any) {
-                this.sendErrorResponse(res, error, UNABLE_TO_COMPLETE_REQUEST, 500) 
+                this.sendErrorResponse(res, error, UNABLE_TO_COMPLETE_REQUEST, 500, session) 
             }
         });
     }
@@ -92,6 +94,7 @@ class AdminTeamController extends BaseApiController {
     updateTeam(path:string) {
         this.router.patch(path, this.teamValidator.validateTeamUpdate);
         this.router.patch(path, async (req, res) => {
+            const session = await createMongooseTransaction();
             try {
                 const {name, slogan, stadium, status} = req.body;                
                 const update = {
@@ -100,7 +103,7 @@ class AdminTeamController extends BaseApiController {
                     stadium,
                     status
                 }
-                const updatedTeam = await teamRepository.updateById(req.params.id, update);
+                const updatedTeam = await teamRepository.updateById(req.params.id, update, session);
 
                 if (!updatedTeam) {
                     const error = new Error("Team not found");
@@ -110,17 +113,18 @@ class AdminTeamController extends BaseApiController {
                 //remove cached data to trigger a refetch from db on next request
                 await deleteCachedData([TEAMS_KEY]);
 
-                this.sendSuccessResponse(res, updatedTeam);
+                this.sendSuccessResponse(res, updatedTeam, 200, session);
             } catch (error:any) {
-                this.sendErrorResponse(res, error, UNABLE_TO_COMPLETE_REQUEST, 500);
+                this.sendErrorResponse(res, error, UNABLE_TO_COMPLETE_REQUEST, 500, session);
             }
         });
     }
 
     removeTeam(path:string) {
         this.router.delete(path, async (req, res) => {
+            const session = await createMongooseTransaction();
             try {
-                const deletedTeam = await teamRepository.deleteById(req.params.id);
+                const deletedTeam = await teamRepository.deleteById(req.params.id, session);
 
                 if (!deletedTeam) {
                     const error = new Error("Team not found");
@@ -130,9 +134,9 @@ class AdminTeamController extends BaseApiController {
                 //remove cached data to trigger a refetch from db on next request
                 await deleteCachedData([TEAMS_KEY]);
         
-                this.sendSuccessResponse(res);
+                this.sendSuccessResponse(res, {}, 200, session);
             } catch (error:any) {
-                this.sendErrorResponse(res, error, UNABLE_TO_COMPLETE_REQUEST, 500);
+                this.sendErrorResponse(res, error, UNABLE_TO_COMPLETE_REQUEST, 500, session);
             }
         });
     }

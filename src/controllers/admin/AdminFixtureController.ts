@@ -114,6 +114,7 @@ class AdminFixtureController extends BaseApiController {
     updateFixture(path:string) {
         this.router.patch(path, this.fixtureValidator.validateFixtureUpdate);
         this.router.patch(path, async (req, res) => {
+            const session = await createMongooseTransaction();
             try {
                 const body = req.body;                
                 const update = {
@@ -126,7 +127,7 @@ class AdminFixtureController extends BaseApiController {
                     "away_team.score": body.away_team_score,
                     status: body.status
                 }
-                const updatedFixture = await fixtureRepository.updateById(req.params.id, update);
+                const updatedFixture = await fixtureRepository.updateById(req.params.id, update, session);
 
                 if (!updatedFixture) {
                     const error = new Error("Fixture not found");
@@ -140,9 +141,9 @@ class AdminFixtureController extends BaseApiController {
 
                 await deleteCachedData(keys);
 
-                this.sendSuccessResponse(res, updatedFixture);
+                this.sendSuccessResponse(res, updatedFixture, 200, session);
             } catch (error:any) {
-                this.sendErrorResponse(res, error, UNABLE_TO_COMPLETE_REQUEST, 500);
+                this.sendErrorResponse(res, error, UNABLE_TO_COMPLETE_REQUEST, 500, session);
             }
         });
     }
@@ -169,8 +170,9 @@ class AdminFixtureController extends BaseApiController {
 
     removeFixture(path:string) {
         this.router.delete(path, async (req, res) => {
+            const session = await createMongooseTransaction();
             try {
-                const deletedFixture = await fixtureRepository.deleteById(req.params.id);
+                const deletedFixture = await fixtureRepository.deleteById(req.params.id, session);
 
                 if (!deletedFixture) {
                     const error = new Error("Fixture not found");
@@ -184,9 +186,9 @@ class AdminFixtureController extends BaseApiController {
 
                 await deleteCachedData(keys);
         
-                this.sendSuccessResponse(res);
+                this.sendSuccessResponse(res, {}, 200, session);
             } catch (error:any) {
-                this.sendErrorResponse(res, error, UNABLE_TO_COMPLETE_REQUEST, 500);
+                this.sendErrorResponse(res, error, UNABLE_TO_COMPLETE_REQUEST, 500, session);
             }
         });
     }

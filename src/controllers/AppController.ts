@@ -146,6 +146,7 @@ class AppController extends BaseApiController {
                 userPrivileges.forEach(privilege => {
                     roles.push(privilege.role);
                 })
+                
                 req.session.data = { user, login_session: loginSession, user_roles: roles };
         
                 this.sendSuccessResponse(res, {message: PASSWORD_UPDATE_SUCCESSFUL, token: token}, 200, session);
