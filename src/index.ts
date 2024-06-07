@@ -4,15 +4,11 @@ import { ENVIRONMENTS} from './common/config/app_config';
 import validateEnvironmentVariables from './common/utils/env_validator';
 import connectToDB from './common/utils/db';
 import { userService } from "./services/user_service";
-import redisClient from "./common/utils/redis";
 
 validateEnvironmentVariables();
 
 connectToDB()
   .then(async () => {
-
-    await redisClient.connect();
-
     app.listen(Env.PORT, () => {
       if (Env.ENVIRONMENT == ENVIRONMENTS.DEV)
         console.log(`Express is listening on ${Env.APP_URL}:${Env.PORT}${Env.API_PATH}`);

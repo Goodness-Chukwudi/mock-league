@@ -13,6 +13,7 @@ const redisClient = createClient({
 
 redisClient.on('error', error => console.log('Error connecting to redis client', error));
 redisClient.on('ready', () => console.log('Redis connection is ready'));
+redisClient.connect();
 
 const redisStackStore = new RedisStackStore({
     client: redisClient,

@@ -7,7 +7,7 @@ import Env from "./common/config/environment_variables";
 import corsSettings from "./common/utils/cors";
 import AdminRoutes from "./routes/AdminRoutes";
 import responseTime from "response-time";
-import { recordResponseTime } from "./common/utils/app_utils";
+import { rateLimiter, recordResponseTime } from "./common/utils/app_utils";
 import PublicController from "./controllers/PublicController";
 import { returnHtmlForUniqueFixtureLink } from "./services/fixture_service";
 import { redisSessionStore } from "./common/utils/redis";
@@ -29,6 +29,7 @@ class App {
       this.app.use(express.json());
       this.app.use(express.urlencoded({ extended: false }));
       this.app.use(redisSessionStore());
+      this.app.use(rateLimiter());
       this.app.use(corsSettings);
       this.app.use(helmet());
       this.app.use(compression());
