@@ -25,7 +25,7 @@ const redisSessionStore = () => {
         store: redisStackStore,
         resave: false,
         saveUninitialized: false,
-        secret: '5UP3r 53Cr37'
+        secret: Env.REDIS_SECRET
     });
 }
 

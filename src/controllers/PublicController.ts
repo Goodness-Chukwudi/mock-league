@@ -7,6 +7,8 @@ import { passwordRepository } from "../services/password_service";
 import { createMongooseTransaction } from "../common/utils/app_utils";
 import { teamRepository } from "../services/team_service";
 import { fixtureRepository } from "../services/fixture_service";
+import { ITEM_STATUS } from "../data/enums/enum";
+import { privilegeRepository } from "../services/user_privilege_service";
 
 class PublicController extends BaseApiController {
 
@@ -51,7 +53,15 @@ class PublicController extends BaseApiController {
                 }
                 await passwordRepository.save(passwordData, session);
 
-                const token = await userService.loginUser(user.id, session);
+                const { token, loginSession} = await userService.loginUser(user.id, session);
+                
+                const roles:string[] = [];
+                const userPrivileges = await privilegeRepository.find({user: user._id, status: ITEM_STATUS.ACTIVE});
+                userPrivileges.forEach(privilege => {
+                    roles.push(privilege.role);
+                })
+                req.session.data = { user, login_session: loginSession, user_roles: roles };
+
                 const response = {
                     message: SIGNUP_SUCCESS,
                     token: token,
@@ -76,20 +86,20 @@ class PublicController extends BaseApiController {
         this.router.post(path, async (req, res) => {
             try {
                 const user = this.requestUtils.getRequestUser();
-                const token = await userService.loginUser(user.id);
+                const { token, loginSession } = await userService.loginUser(user.id);
+
+                const roles:string[] = [];
+                const userPrivileges = await privilegeRepository.find({user: user._id, status: ITEM_STATUS.ACTIVE});
+                userPrivileges.forEach(privilege => {
+                    roles.push(privilege.role);
+                })
+                req.session.data = { user, login_session: loginSession, user_roles: roles };
+
                 const response = {
                     message: LOGIN_SUCCESSFUL,
                     token: token,
                     user: user
                 }
-
-                console.log(req.session);
-
-                req.session.user_id = user.id;
-                req.session.user_name = user.full_name;
-                req.session.user_email = user.email;
-
-                // console.log(req.session)
 
                 return this.sendSuccessResponse(res, response);
             } catch (error:any) {

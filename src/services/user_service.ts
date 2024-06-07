@@ -39,7 +39,11 @@ const logoutUser = async (userId: string): Promise<ILoginSessionDocument> => {
  })
 }
 
-const loginUser = async (userId: string, session?: ClientSession): Promise<string> => {
+interface LoginResponse {
+    token: string;
+    loginSession: ILoginSessionDocument
+}
+const loginUser = async (userId: string, session?: ClientSession): Promise<LoginResponse> => {
  return new Promise(async (resolve, reject) => {
     try {
         const loginSessionData = {
@@ -48,7 +52,7 @@ const loginUser = async (userId: string, session?: ClientSession): Promise<strin
         };
         const loginSession = await loginSessionRepository.save(loginSessionData, session);
         const token = createAuthToken(userId, loginSession.id);
-        resolve(token);
+        resolve({token, loginSession});
     } catch (error) {
         reject(error);
     }

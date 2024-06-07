@@ -1,6 +1,6 @@
 import BaseApiController from "./base controllers/BaseApiController";
 import { UNABLE_TO_COMPLETE_REQUEST } from "../common/constant/error_response_message";
-import { BIT, FIXTURE_STATUS, PASSWORD_STATUS } from "../data/enums/enum";
+import { BIT, FIXTURE_STATUS, ITEM_STATUS, PASSWORD_STATUS } from "../data/enums/enum";
 import { USER_PASSWORD_LABEL } from "../common/constant/app_constants";
 import { createMongooseTransaction } from "../common/utils/app_utils";
 import AppValidator from "../middlewares/validators/AppValidator";
@@ -9,6 +9,7 @@ import { passwordRepository } from "../services/password_service";
 import { userService } from "../services/user_service";
 import { teamRepository } from "../services/team_service";
 import { fixtureRepository } from "../services/fixture_service";
+import { privilegeRepository } from "../services/user_privilege_service";
 
 class AppController extends BaseApiController {
     private appValidator: AppValidator;
@@ -139,7 +140,14 @@ class AppController extends BaseApiController {
                 await passwordRepository.updateById(previousPassword.id, {status: PASSWORD_STATUS.DEACTIVATED}, session);
 
                 await userService.logoutUser(user.id);
-                const token = await userService.loginUser(user.id);
+                const { token, loginSession} = await userService.loginUser(user.id);
+
+                const roles:string[] = [];
+                const userPrivileges = await privilegeRepository.find({user: user._id, status: ITEM_STATUS.ACTIVE});
+                userPrivileges.forEach(privilege => {
+                    roles.push(privilege.role);
+                })
+                req.session.data = { user, login_session: loginSession, user_roles: roles };
         
                 this.sendSuccessResponse(res, {message: PASSWORD_UPDATE_SUCCESSFUL, token: token}, 200, session);
             } catch (error:any) {

@@ -57,7 +57,7 @@ class AppValidator extends BaseRouterMiddleware {
                     return this.sendErrorResponse(res, error, DUPLICATE_PHONE, 400)
                 }
             }
-
+            
             next();
         } catch (error: any) {
             return this.sendErrorResponse(res, error, badRequestError(error.message), 400);

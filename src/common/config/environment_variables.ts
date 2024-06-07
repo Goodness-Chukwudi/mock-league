@@ -13,6 +13,7 @@ interface IEnv {
     REDIS_PASSWORD: string;
     REDIS_HOST: string;
     REDIS_PORT: number;
+    REDIS_SECRET: string;
 }
 
 
@@ -28,7 +29,8 @@ const Env: IEnv = {
     MONGODB_URI: process.env.MONGODB_URI as string,
     REDIS_PASSWORD: process.env.REDIS_PASSWORD as string,
     REDIS_HOST: process.env.REDIS_HOST as string,
-    REDIS_PORT: Number(process.env.REDIS_PORT)
+    REDIS_PORT: Number(process.env.REDIS_PORT),
+    REDIS_SECRET: process.env.REDIS_SECRET as string
 }
 
 export default Env;
