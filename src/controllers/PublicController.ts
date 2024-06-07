@@ -9,6 +9,7 @@ import { teamRepository } from "../services/team_service";
 import { fixtureRepository } from "../services/fixture_service";
 import { ITEM_STATUS } from "../data/enums/enum";
 import { privilegeRepository } from "../services/user_privilege_service";
+import { getEndOfDay, getStartOfDay } from "../common/utils/date_utils";
 
 class PublicController extends BaseApiController {
 
@@ -54,7 +55,7 @@ class PublicController extends BaseApiController {
                 await passwordRepository.save(passwordData, session);
 
                 const { token, loginSession} = await userService.loginUser(user.id, session);
-                
+
                 const roles:string[] = [];
                 const userPrivileges = await privilegeRepository.find({user: user._id, status: ITEM_STATUS.ACTIVE});
                 userPrivileges.forEach(privilege => {
@@ -113,6 +114,8 @@ class PublicController extends BaseApiController {
             try {
                 const reqQuery: Record<string, any> = req.query;
                 let query = {};
+
+                if (reqQuery.status) query = {...query, status: reqQuery.status};
                 if (reqQuery.search) query = {
                     ...query,
                     $or: [
@@ -141,6 +144,8 @@ class PublicController extends BaseApiController {
             try {
                 const reqQuery: Record<string, any> = req.query;
                 let query = {};
+
+                if (reqQuery.status) query = {...query, status: reqQuery.status};
                 if (reqQuery.search) query = {
                     ...query,
                     $or: [
@@ -150,6 +155,12 @@ class PublicController extends BaseApiController {
                         {referee: new RegExp(`${req.query.search}`, "i")}
                     ]
                 };
+
+                if (reqQuery.start_date && reqQuery.end_date) {
+                    const startDate = getStartOfDay(reqQuery.start_date)
+                    const endDate = getEndOfDay(reqQuery.end_date)
+                    query = {...query, kick_off: { $gte: startDate, $lte: endDate }}
+                }
 
                 let limit;
                 let page;

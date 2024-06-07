@@ -1,7 +1,7 @@
 import BaseApiController from "./base controllers/BaseApiController";
 import { UNABLE_TO_COMPLETE_REQUEST } from "../common/constant/error_response_message";
 import { BIT, FIXTURE_STATUS, ITEM_STATUS, PASSWORD_STATUS } from "../data/enums/enum";
-import { USER_PASSWORD_LABEL } from "../common/constant/app_constants";
+import { COMPLETED_FIXTURES_KEY, PENDING_FIXTURES_KEY, TEAMS_KEY, USER_PASSWORD_LABEL } from "../common/constant/app_constants";
 import { createMongooseTransaction } from "../common/utils/app_utils";
 import AppValidator from "../middlewares/validators/AppValidator";
 import { PASSWORD_UPDATE_SUCCESSFUL } from "../common/constant/success_response_message";
@@ -10,6 +10,7 @@ import { userService } from "../services/user_service";
 import { teamRepository } from "../services/team_service";
 import { fixtureRepository } from "../services/fixture_service";
 import { privilegeRepository } from "../services/user_privilege_service";
+import { getCachedData, setCachedData } from "../common/utils/redis";
 
 class AppController extends BaseApiController {
     private appValidator: AppValidator;
@@ -36,12 +37,12 @@ class AppController extends BaseApiController {
     listTeams(path:string) {
         this.router.get(path, async (req, res) => {
             try {
-                let limit;
-                let page;
-                if (req.query.limit) limit = Number(req.query.limit);
-                if (req.query.page) page = Number(req.query.page);
 
-                const teams = await teamRepository.paginate({}, limit, page);
+                let teams = await getCachedData(TEAMS_KEY);
+                if (!teams) {
+                    teams = await teamRepository.find();
+                    await setCachedData(TEAMS_KEY, teams);
+                }
         
                 this.sendSuccessResponse(res, teams);
             } catch (error:any) {
@@ -53,13 +54,12 @@ class AppController extends BaseApiController {
     listPendingFixtures(path:string) {
         this.router.get(path, async (req, res) => {
             try {
-                const query = {status: FIXTURE_STATUS.PENDING};
-                let limit;
-                let page;
-                if (req.query.limit) limit = Number(req.query.limit);
-                if (req.query.page) page = Number(req.query.page);
 
-                const fixtures = await fixtureRepository.paginate(query, limit, page);
+                let fixtures = await getCachedData(PENDING_FIXTURES_KEY);
+                if (!fixtures) {
+                    fixtures = await fixtureRepository.find({ status: FIXTURE_STATUS.PENDING });
+                    await setCachedData(PENDING_FIXTURES_KEY, fixtures);
+                }
         
                 this.sendSuccessResponse(res, fixtures);
             } catch (error:any) {
@@ -71,14 +71,13 @@ class AppController extends BaseApiController {
     listCompletedFixtures(path:string) {
         this.router.get(path, async (req, res) => {
             try {
-                const query = {status: FIXTURE_STATUS.COMPLETED};
-                let limit;
-                let page;
-                if (req.query.limit) limit = Number(req.query.limit);
-                if (req.query.page) page = Number(req.query.page);
 
-                const fixtures = await fixtureRepository.paginate(query, limit, page);
-        
+                let fixtures = await getCachedData(COMPLETED_FIXTURES_KEY);
+                if (!fixtures) {
+                    fixtures = await fixtureRepository.find({ status: FIXTURE_STATUS.COMPLETED });
+                    await setCachedData(COMPLETED_FIXTURES_KEY, fixtures);
+                }
+                        
                 this.sendSuccessResponse(res, fixtures);
             } catch (error:any) {
                 this.sendErrorResponse(res, error, UNABLE_TO_COMPLETE_REQUEST, 500) 

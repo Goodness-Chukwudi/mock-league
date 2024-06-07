@@ -29,8 +29,39 @@ const redisSessionStore = () => {
     });
 }
 
+const setCachedData = async (key: string, data: any) => {
+    try {
+        await redisClient.setEx(key, 3600, data)
+    } catch (error) {
+        throw error;
+    }
+}
+
+const getCachedData = async (key: string) => {
+    try {
+        const data = await redisClient.get(key);
+
+        const jsonData = data ? JSON.parse(data) : null;
+
+        return jsonData;
+    } catch (error) {
+        throw error;
+    }
+
+}
+
+const deleteCachedData = async (keys: string[]) => {
+    try {
+        await redisClient.del(keys);
+    } catch (error) {
+        throw error;
+    }
+}
 
 export default redisClient;
 export {
-    redisSessionStore
+    redisSessionStore,
+    setCachedData,
+    getCachedData,
+    deleteCachedData
 };

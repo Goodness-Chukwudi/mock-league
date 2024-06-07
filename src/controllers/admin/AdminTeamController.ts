@@ -1,9 +1,10 @@
 
 import BaseApiController from "../base controllers/BaseApiController";
 import TeamValidator from "../../middlewares/validators/TeamValidator";
-import { getEndOfDay, getStartOfDay } from "../../common/utils/date_utils";
 import { UNABLE_TO_COMPLETE_REQUEST, resourceNotFound } from "../../common/constant/error_response_message";
 import { teamRepository } from "../../services/team_service";
+import { TEAMS_KEY } from "../../common/constant/app_constants";
+import { deleteCachedData, getCachedData, setCachedData } from "../../common/utils/redis";
 
 class AdminTeamController extends BaseApiController {
     private teamValidator: TeamValidator;
@@ -40,6 +41,9 @@ class AdminTeamController extends BaseApiController {
                     added_by: user.id
                 };
                 const team = await teamRepository.save(teamData);
+
+                //remove cached data to trigger a refetch from db on next request
+                await deleteCachedData([TEAMS_KEY]);
         
                 this.sendSuccessResponse(res, team, 201);
             } catch (error:any) {
@@ -51,32 +55,12 @@ class AdminTeamController extends BaseApiController {
     listTeams(path:string) {
         this.router.get(path, async (req, res) => {
             try {
-                const reqQuery: Record<string, any> = req.query;
-                let query = {};
 
-                if (reqQuery.status) query = {...query, status: reqQuery.status};
-                if (reqQuery.added_by) query = {...query, added_by: reqQuery.added_by};
-                if (reqQuery.start_date && reqQuery.end_date) {
-                    const startDate = getStartOfDay(reqQuery.start_date)
-                    const endDate = getEndOfDay(reqQuery.end_date)
-                    query = {...query, created_at: { $gte: startDate, $lte: endDate }}
+                let teams = await getCachedData(TEAMS_KEY);
+                if (!teams) {
+                    teams = await teamRepository.find();
+                    await setCachedData(TEAMS_KEY, teams)
                 }
-                if (reqQuery.search) query = {
-                    ...query,
-                    $or: [
-                        {name: new RegExp(`${req.query.search}`, "i")},
-                        {slogan: new RegExp(`${req.query.search}`, "i")},
-                        {stadium: new RegExp(`${req.query.search}`, "i")}
-                    ]
-                };
-
-
-                let limit;
-                let page;
-                if (reqQuery.limit) limit = Number(reqQuery.limit);
-                if (reqQuery.page) page = Number(reqQuery.page);
-
-                const teams = await teamRepository.paginate(query, limit, page);
         
                 this.sendSuccessResponse(res, teams);
             } catch (error:any) {
@@ -123,6 +107,9 @@ class AdminTeamController extends BaseApiController {
                     return this.sendErrorResponse(res, error, resourceNotFound("Team"), 404) 
                 }
 
+                //remove cached data to trigger a refetch from db on next request
+                await deleteCachedData([TEAMS_KEY]);
+
                 this.sendSuccessResponse(res, updatedTeam);
             } catch (error:any) {
                 this.sendErrorResponse(res, error, UNABLE_TO_COMPLETE_REQUEST, 500);
@@ -133,7 +120,15 @@ class AdminTeamController extends BaseApiController {
     removeTeam(path:string) {
         this.router.delete(path, async (req, res) => {
             try {
-                await teamRepository.deleteById(req.params.id);
+                const deletedTeam = await teamRepository.deleteById(req.params.id);
+
+                if (!deletedTeam) {
+                    const error = new Error("Team not found");
+                    return this.sendErrorResponse(res, error, resourceNotFound("Team"), 404) 
+                }
+
+                //remove cached data to trigger a refetch from db on next request
+                await deleteCachedData([TEAMS_KEY]);
         
                 this.sendSuccessResponse(res);
             } catch (error:any) {

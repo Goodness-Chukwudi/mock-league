@@ -22,7 +22,7 @@ const FixtureSchema = new Schema<Record<keyof ICreateFixture, any>>({
     url_id: {type: String, default: "", unique: true},
     referee: {type: String, required: true},
     created_by: { type: ObjectId, required: true, ref: MODEL_NAMES.USER},
-    status: {type: String, enum: Object.values(FIXTURE_STATUS), default: FIXTURE_STATUS.UPCOMING}
+    status: {type: String, enum: Object.values(FIXTURE_STATUS), default: FIXTURE_STATUS.PENDING}
 }, 
 {
     timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' }

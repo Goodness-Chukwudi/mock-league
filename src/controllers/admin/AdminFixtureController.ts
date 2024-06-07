@@ -1,12 +1,15 @@
 
 import BaseApiController from "../base controllers/BaseApiController";
-import { getEndOfDay, getStartOfDay } from "../../common/utils/date_utils";
 import { UNABLE_TO_COMPLETE_REQUEST, resourceNotFound } from "../../common/constant/error_response_message";
 import { teamRepository } from "../../services/team_service";
 import FixtureValidator from "../../middlewares/validators/FixtureValidator";
 import { fixtureRepository } from "../../services/fixture_service";
 import { nanoid } from "nanoid";
 import Env from "../../common/config/environment_variables";
+import { deleteCachedData, getCachedData, setCachedData } from "../../common/utils/redis";
+import { createMongooseTransaction } from "../../common/utils/app_utils";
+import { FIXTURES_KEY, PENDING_FIXTURES_KEY } from "../../common/constant/app_constants";
+import { FIXTURE_STATUS } from "../../data/enums/enum";
 
 class AdminFixtureController extends BaseApiController {
     private fixtureValidator: FixtureValidator;
@@ -33,6 +36,7 @@ class AdminFixtureController extends BaseApiController {
     addFixture(path:string) {
         this.router.post(path, this.fixtureValidator.validateFixture);
         this.router.post(path, async (req, res) => {
+            const session = await createMongooseTransaction();
             try {
                 const user = this.requestUtils.getRequestUser();
                 const body = req.body;
@@ -57,11 +61,14 @@ class AdminFixtureController extends BaseApiController {
                     referee: body.referee,
                     created_by: user.id
                 };
-                const fixture = await fixtureRepository.save(fixtureData);
+                const fixture = await fixtureRepository.save(fixtureData, session);
+
+                //remove cached data to trigger a refetch from db on next request
+                await deleteCachedData([FIXTURES_KEY, PENDING_FIXTURES_KEY]);
         
-                this.sendSuccessResponse(res, fixture, 201);
+                this.sendSuccessResponse(res, fixture, 201, session);
             } catch (error:any) {
-                this.sendErrorResponse(res, error, UNABLE_TO_COMPLETE_REQUEST, 500) 
+                this.sendErrorResponse(res, error, UNABLE_TO_COMPLETE_REQUEST, 500, session) 
             }
         });
     }
@@ -69,24 +76,12 @@ class AdminFixtureController extends BaseApiController {
     listFixtures(path:string) {
         this.router.get(path, async (req, res) => {
             try {
-                const reqQuery: Record<string, any> = req.query;
-                let query = {};
-
-                if (reqQuery.status) query = {...query, status: reqQuery.status};
-                if (reqQuery.added_by) query = {...query, added_by: reqQuery.added_by};
-                if (reqQuery.start_date && reqQuery.end_date) {
-                    const startDate = getStartOfDay(reqQuery.start_date)
-                    const endDate = getEndOfDay(reqQuery.end_date)
-                    query = {...query, kick_off: { $gte: startDate, $lte: endDate }}
+                let fixtures = await getCachedData(FIXTURES_KEY);
+                if (!fixtures) {
+                    fixtures = await fixtureRepository.find();
+                    await setCachedData(FIXTURES_KEY, fixtures)
                 }
 
-                let limit;
-                let page;
-                if (reqQuery.limit) limit = Number(reqQuery.limit);
-                if (reqQuery.page) page = Number(reqQuery.page);
-
-                const fixtures = await fixtureRepository.paginate(query, limit, page);
-        
                 this.sendSuccessResponse(res, fixtures);
             } catch (error:any) {
                 this.sendErrorResponse(res, error, UNABLE_TO_COMPLETE_REQUEST, 500) 
@@ -138,6 +133,13 @@ class AdminFixtureController extends BaseApiController {
                     return this.sendErrorResponse(res, error, resourceNotFound("Fixture"), 404) 
                 }
 
+                //remove cached data to trigger a refetch from db on next request
+                const keys = [FIXTURES_KEY];
+                if (updatedFixture.status = FIXTURE_STATUS.PENDING) keys.push(FIXTURE_STATUS.PENDING);
+                if (updatedFixture.status = FIXTURE_STATUS.COMPLETED) keys.push(FIXTURE_STATUS.COMPLETED);
+
+                await deleteCachedData(keys);
+
                 this.sendSuccessResponse(res, updatedFixture);
             } catch (error:any) {
                 this.sendErrorResponse(res, error, UNABLE_TO_COMPLETE_REQUEST, 500);
@@ -168,7 +170,19 @@ class AdminFixtureController extends BaseApiController {
     removeFixture(path:string) {
         this.router.delete(path, async (req, res) => {
             try {
-                await fixtureRepository.deleteById(req.params.id);
+                const deletedFixture = await fixtureRepository.deleteById(req.params.id);
+
+                if (!deletedFixture) {
+                    const error = new Error("Fixture not found");
+                    return this.sendErrorResponse(res, error, resourceNotFound("Fixture"), 404) 
+                }
+
+                //remove cached data to trigger a refetch from db on next request
+                const keys = [FIXTURES_KEY];
+                if (deletedFixture.status = FIXTURE_STATUS.PENDING) keys.push(FIXTURE_STATUS.PENDING);
+                if (deletedFixture.status = FIXTURE_STATUS.COMPLETED) keys.push(FIXTURE_STATUS.COMPLETED);
+
+                await deleteCachedData(keys);
         
                 this.sendSuccessResponse(res);
             } catch (error:any) {
