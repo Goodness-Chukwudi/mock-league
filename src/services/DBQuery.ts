@@ -11,10 +11,10 @@ import { IQueryOptions, PaginatedDocument } from "../data/interfaces/interfaces"
  * - inherit it's database access methods
  * @param {Model<T>} Model A mongoose model on which the query is performed
  * @param {T} interface of the model schema
- * @param {TCreate} interface of the payload to create the  document
+ * @param {TCreatePayload} interface of the payload to create the  document
  * @param {TDocument} interface of the document schema
 */
-abstract class DBQuery<T, TCreate, TDocument> {
+abstract class DBQuery<T, TCreatePayload, TDocument> {
 
     private readonly Model:Model<Required<T>>;
 
@@ -27,7 +27,7 @@ abstract class DBQuery<T, TCreate, TDocument> {
      * @param {TCreate} data Document to be saved
      * @param {IQueryOptions} options An optional object containing parameters that can be passed to the mongoose query
     */
-    public save(data: TCreate, options?: IQueryOptions): Promise<TDocument> {
+    public save(data: TCreatePayload, options?: IQueryOptions): Promise<TDocument> {
         try {
             const model = new this.Model(data);
             return model.save({session: options?.session}) as Promise<TDocument>;
