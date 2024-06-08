@@ -134,9 +134,9 @@ class AppController extends BaseApiController {
                     email: user.email,
                     user: user.id
                 }
-                await passwordRepository.save(passwordData, session);
+                await passwordRepository.save(passwordData, {session});
                 //Deactivate old password
-                await passwordRepository.updateById(previousPassword.id, {status: PASSWORD_STATUS.DEACTIVATED}, session);
+                await passwordRepository.updateById(previousPassword.id, {status: PASSWORD_STATUS.DEACTIVATED}, {session});
 
                 await userService.logoutUser(user.id);
                 const { token, loginSession} = await userService.loginUser(user.id);

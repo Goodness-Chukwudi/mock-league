@@ -46,13 +46,13 @@ class PublicController extends BaseApiController {
                     phone: body.phone,
                     gender: body.gender
                 }
-                const user = await userRepository.save(userData, session);
+                const user = await userRepository.save(userData, {session});
                 const passwordData = {
                     password: body.password,
                     email: user.email,
                     user: user.id
                 }
-                await passwordRepository.save(passwordData, session);
+                await passwordRepository.save(passwordData, {session});
 
                 const { token, loginSession} = await userService.loginUser(user.id, session);
 
@@ -130,7 +130,7 @@ class PublicController extends BaseApiController {
                 if (reqQuery.limit) limit = Number(reqQuery.limit);
                 if (reqQuery.page) page = Number(reqQuery.page);
 
-                const teams = await teamRepository.paginate(query, limit, page);
+                const teams = await teamRepository.paginate(query, { limit, page });
         
                 this.sendSuccessResponse(res, teams);
             } catch (error:any) {
@@ -167,7 +167,7 @@ class PublicController extends BaseApiController {
                 if (reqQuery.limit) limit = Number(reqQuery.limit);
                 if (reqQuery.page) page = Number(reqQuery.page);
 
-                const fixtures = await fixtureRepository.paginate(query, limit, page);
+                const fixtures = await fixtureRepository.paginate(query, { limit, page });
         
                 this.sendSuccessResponse(res, fixtures);
             } catch (error:any) {

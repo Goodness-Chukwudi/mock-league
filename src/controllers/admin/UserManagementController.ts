@@ -45,7 +45,7 @@ class UserManagementController extends BaseApiController {
                 if (req.query.limit) limit = Number(req.query.limit);
                 if (req.query.page) page = Number(req.query.page);
                 
-                const users = await userRepository.paginate(query, limit, page);
+                const users = await userRepository.paginate(query, { limit, page });
 
                 this.sendSuccessResponse(res, users);
             } catch (error: any) {

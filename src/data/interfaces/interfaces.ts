@@ -1,4 +1,7 @@
 import joi, { Extension, Root } from "joi";
+import { ILoginSessionDocument } from "../../models/login_session";
+import { IUserDocument } from "../../models/user";
+import { ClientSession } from "mongoose";
 
 interface IResponseMessage {
     response_code: number;
@@ -37,9 +40,39 @@ interface AuthTokenPayload {
     loginSession: string
 }
 
+interface IQueryOptions {
+    session?: ClientSession;
+    selectedFields?: string|string[];
+    populatedFields?: DbPopulation;
+    limit?: number;
+    page?: number;
+    sort?: DbSortQuery;
+}
+
+type DbSortQuery = Record<string, 1|-1> | null;
+type DbPopulation = string[] | {path: string, select: string|string[]}[];
+
+// declare module "express-serve-static-core" {
+//     interface Request {
+//       sessionsss: boolean;
+//     }
+// }
+declare module 'express-session' {
+    interface SessionData {
+        data: {
+            user: IUserDocument;
+            login_session: ILoginSessionDocument;
+            user_roles: string[];
+        }
+    }
+}
+
 export {
     IResponseMessage,
     JoiExtensionFactory,
     PaginatedDocument,
-    AuthTokenPayload
+    AuthTokenPayload,
+    IQueryOptions,
+    DbSortQuery,
+    DbPopulation
 }

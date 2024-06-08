@@ -50,7 +50,7 @@ const loginUser = async (userId: string, session?: ClientSession): Promise<Login
             user: userId,
             status: BIT.ON
         };
-        const loginSession = await loginSessionRepository.save(loginSessionData, session);
+        const loginSession = await loginSessionRepository.save(loginSessionData, {session});
         const token = createAuthToken(userId, loginSession.id);
         resolve({token, loginSession});
     } catch (error) {
@@ -71,21 +71,21 @@ const createSuperAdminUser = async () => {
                 phone: "070435343453",
                 gender: "male"
             }
-            const user = await userRepository.save(userData, session);
+            const user = await userRepository.save(userData, {session});
             const password = getCode(8);
             const passwordData = {
                 password: await hashData(password),
                 email: user.email,
                 user: user.id
             }
-            await passwordRepository.save(passwordData, session);
+            await passwordRepository.save(passwordData, {session});
     
             const privilege = {
                 user: user.id,
                 role: USER_ROLES.SUPER_ADMIN,
                 assigned_by: user.id
             }
-            await privilegeRepository.save(privilege, session);
+            await privilegeRepository.save(privilege, {session});
     
             console.log("email:    " + user.email)
             console.log("password:    " + password)

@@ -1,8 +1,7 @@
 import {Model, ClientSession, UpdateQuery, FilterQuery } from "mongoose";
 import { PaginationCustomLabels } from "../common/config/app_config";
 import { ITEM_STATUS } from "../data/enums/enum";
-import { DbPopulation, DbSortQuery } from "../data/interfaces/types";
-import { PaginatedDocument } from "../data/interfaces/interfaces";
+import { IQueryOptions, PaginatedDocument } from "../data/interfaces/interfaces";
 
 /**
  * An abstract class that provides methods for performing DB queries.
@@ -26,13 +25,12 @@ abstract class DBQuery<T, TCreate, TDocument> {
     /**
      * Saves document using mongoose's save api.
      * @param {TCreate} data Document to be saved
-     * @param {ClientSession} session An optional mongoose client session, required to commit a running database transaction if any
-     * @returns {TDocument} A promise resolving to the saved document
+     * @param {IQueryOptions} options An optional object containing parameters that can be passed to the mongoose query
     */
-    public save(data: TCreate, session: ClientSession|null = null): Promise<TDocument> {
+    public save(data: TCreate, options?: IQueryOptions): Promise<TDocument> {
         try {
             const model = new this.Model(data);
-            return model.save({session: session}) as Promise<TDocument>;
+            return model.save({session: options?.session}) as Promise<TDocument>;
         } catch (error) {
             throw error;
         }
@@ -41,19 +39,16 @@ abstract class DBQuery<T, TCreate, TDocument> {
     /**
      * Fetches all documents that matches the provided query
      * @param {FilterQuery<T>} query An optional mongo query to fetch documents that matched the filter. Returns all documents if query isn't provided
-     * @param {string[]} selectedFields An optional array of string, containing fields in the document that are to be selected
-     * @param {DbSortQuery} sort An optional mongoose sort object specifying the field and order to sort the list with
-     * @param {ClientSession} session An optional mongoose client session, required if the operation is in a transaction
-     * @returns {Promise<TDocument[]>} A promise resolving to a a list of documents that match filter
+     * @param {IQueryOptions} options An optional object containing parameters that can be passed to the mongoose query
     */
-    public find(query:FilterQuery<T> = {}, limit?:number,  selectedFields?:string|string[], sort?:DbSortQuery, session?:ClientSession): Promise<TDocument[]> {
+    public find(query:FilterQuery<T> = {}, options?: IQueryOptions): Promise<TDocument[]> {
         const finalQuery = query.status ? query : Object.assign(query, {status: {$ne: ITEM_STATUS.DELETED}});
         return new Promise((resolve, reject) => {
             this.Model.find(finalQuery)
-                .session(session || null)
-                .sort(sort || {created_at: -1})
-                .limit(limit || 10)
-                .select(selectedFields || [])
+                .session(options?.session || null)
+                .sort(options?.sort || {created_at: -1})
+                .limit(options?.limit || 10)
+                .select(options?.selectedFields || [])
                 .then((data) => {
                     resolve(data as TDocument[]);
                 })
@@ -66,26 +61,21 @@ abstract class DBQuery<T, TCreate, TDocument> {
     /**
      * Fetches a paginated list of documents that matches the provided filter.
      * @param {FilterQuery<T>} query An optional mongo query to fetch a list of documents that matched the filter
-     * @param {number} limit Sets the number of documents per page. Default is 10
-     * @param {number} page Sets the page to fetch. Default is 1
-     * @param {string[]} selectedFields An optional array of string, containing fields in the document that are to be selected
-     * @param {DbSortQuery} sort An optional mongoose sort object specifying the field and order to sort the list with
-     * @returns {Promise<PaginatedDocument<T>>} A promise resolving to a paginated list of documents that match filter
+     * @param {IQueryOptions} options An optional object containing parameters that can be passed to the mongoose query
     */
-    public paginate(query:FilterQuery<T> = {}, limit?:number, page?:number, sort?:DbSortQuery, selectedFields?:string|string[]): Promise<PaginatedDocument<T>> {
+    public paginate(query:FilterQuery<T> = {}, options?: IQueryOptions): Promise<PaginatedDocument<T>> {
         const finalQuery = query.status ? query : Object.assign(query, {status: {$ne: ITEM_STATUS.DELETED}});
-
-        const options = {
-            select: selectedFields || [],
-            page: page || 1,
-            limit: limit || 10,
-            sort: sort || {created_at: -1},
+        const paginationOptions = {
+            select: options?.selectedFields || [],
+            page: options?.page || 1,
+            limit: options?.limit || 10,
+            sort: options?.sort || {created_at: -1},
             customLabels: PaginationCustomLabels
         };
 
         return new Promise((resolve, reject) => {
             // @ts-ignore
-            this.Model.paginate(finalQuery, options)
+            this.Model.paginate(finalQuery, paginationOptions)
                 .then((data: any) => {
                     resolve(data as PaginatedDocument<T>);
                 })
@@ -98,15 +88,13 @@ abstract class DBQuery<T, TCreate, TDocument> {
     /**
      * Fetches a document with the provided id.
      * @param {string} id The object id of the document to be fetched
-     * @param {string[]} selectedFields An optional array of string, containing fields in the document that are to be selected
-     * @param {ClientSession} session An optional mongoose client session, required if the operation is in a transaction
-     * @returns {Promise<TDocument>} A promise resolving to a mongodb document.
+     *  @param {IQueryOptions} options An optional object containing parameters that can be passed to the mongoose query
     */
-   public findById(id: string, selectedFields?:string|string[], session?:ClientSession): Promise<TDocument> {
+   public findById(id: string, options?: IQueryOptions): Promise<TDocument> {
         return new Promise((resolve, reject) => {
             this.Model.findById(id)
-                .session(session || null)
-                .select(selectedFields || [])
+                .session(options?.session || null)
+                .select(options?.selectedFields || [])
                 .then((data) => {
                     resolve(data as TDocument);
                 })
@@ -120,18 +108,14 @@ abstract class DBQuery<T, TCreate, TDocument> {
     /**
      * Fetches a document with the provided id. The specified ref paths are populated
      * @param {string} id The object id of the document to be fetched
-     * @param {string[]} selectedFields An optional array of string, containing fields in the document that are to be selected
-     * @param {DbPopulation} populatedFields An optional array of string or objects, specifying fields in the document that are to be populated
-     * @param {ClientSession} session An optional mongoose client session, required if the operation is in a transaction
-     * @returns {Promise<TDocument>} A promise resolving to a mongodb document. The ref paths are populated with it's parent documents
+     *  @param {IQueryOptions} options An optional object containing parameters that can be passed to the mongoose query
     */
-    public findByIdAndPopulate(id:string, populatedFields?:DbPopulation, selectedFields?:string|string[], session?:ClientSession): Promise<TDocument> {
+    public findByIdAndPopulate(id:string, options?: IQueryOptions): Promise<TDocument> {
         return new Promise((resolve, reject) => {
             this.Model.findById(id)
-            //@ts-ignore
-                .populate(populatedFields || [])
-                .session(session || null)
-                .select(selectedFields || [])
+                .populate(options?.populatedFields || [])
+                .session(options?.session || null)
+                .select(options?.selectedFields || [])
                 .then((data) => {
                     resolve(data as TDocument);
                 })
@@ -145,16 +129,14 @@ abstract class DBQuery<T, TCreate, TDocument> {
     /**
      * Fetches a document that matched the provided filter.
      * @param {FilterQuery<T>} query An mongo query to fetch a document that matches the filter
-     * @param {string[]} selectedFields An optional array of string, containing fields in the document that are to be selected
-     * @param {ClientSession} session An optional mongoose client session, required if the operation is in a transaction
-     * @returns {Promise<TDocument>} A promise resolving to a mongodb document.
+     *  @param {IQueryOptions} options An optional object containing parameters that can be passed to the mongoose query
     */
-    public findOne(query:FilterQuery<T> = {}, selectedFields?:string|string[], session?:ClientSession): Promise<TDocument> {
+    public findOne(query:FilterQuery<T> = {}, options?: IQueryOptions): Promise<TDocument> {
         const finalQuery = query.status ? query : Object.assign(query, {status: {$ne: ITEM_STATUS.DELETED}});
         return new Promise((resolve, reject) => {
             this.Model.findOne(finalQuery)
-                .session(session || null)
-                .select(selectedFields || [])
+                .session(options?.session || null)
+                .select(options?.selectedFields || [])
                 .then((data) => {
                     resolve(data as TDocument);
                 })
@@ -168,19 +150,15 @@ abstract class DBQuery<T, TCreate, TDocument> {
     /**
      * Fetches a document that matched the provided filter. The specified ref paths are populated
      * @param {FilterQuery<T>} query An optional mongo query to fetch a list of documents that match filter
-     * @param {string[]} selectedFields An optional array of string, containing fields in the document that are to be selected
-     * @param {DbPopulation} populatedFields An optional array of string or objects, specifying fields in the document that are to be populated
-     * @param {ClientSession} session An optional mongoose client session, required if the operation is in a transaction
-     * @returns {Promise<TDocument>} A promise resolving to a mongodb document. The ref paths are populated with it's parent documents
+     *  @param {IQueryOptions} options An optional object containing parameters that can be passed to the mongoose query
     */
-    public findOneAndPopulate(query:FilterQuery<T> = {},  populatedFields?:DbPopulation, selectedFields?:string|string[], session?:ClientSession): Promise<TDocument> {
+    public findOneAndPopulate(query:FilterQuery<T> = {}, options?: IQueryOptions ): Promise<TDocument> {
         const finalQuery = query.status ? query : Object.assign(query, {status: {$ne: ITEM_STATUS.DELETED}});
         return new Promise((resolve, reject) => {
             this.Model.findOne(finalQuery)
-            //@ts-ignore
-                .populate(populatedFields)
-                .session(session || null)
-                .select(selectedFields || [])
+                .populate(options?.populatedFields || [])
+                .session(options?.session || null)
+                .select(options?.selectedFields || [])
                 .then((data:any) => {
                     resolve(data as TDocument);
                 })
@@ -194,16 +172,13 @@ abstract class DBQuery<T, TCreate, TDocument> {
     /**
      * Updates a document that matches the provided object id
      * @param {string} id The object id of the document to be updated
-     * @param {UpdateQuery<T>} data The update to be made
-     * @param {ClientSession} session An optional mongoose client session, required if the operation is in a transaction
-     * @param {string[]} selectedFields An optional array of string, containing fields in the document that are to be selected
-     * @returns {Promise<TDocument>} A promise resolving to a mongodb document. The ref paths are populated with it's parent documents
+     *  @param {IQueryOptions} options An optional object containing parameters that can be passed to the mongoose query
     */
-    public updateById(id:string, data:UpdateQuery<T>, session?:ClientSession, selectedFields?:string|string[]): Promise<TDocument> {
+    public updateById(id:string, data:UpdateQuery<T>, options?: IQueryOptions): Promise<TDocument> {
         return new Promise((resolve, reject) => {
             this.Model.findByIdAndUpdate(id, data, {new: true})
-            .session(session || null)
-            .select(selectedFields || [])
+            .session(options?.session || null)
+            .select(options?.selectedFields || [])
             .then((data) => {
                 resolve(data as TDocument);
             })
@@ -216,8 +191,7 @@ abstract class DBQuery<T, TCreate, TDocument> {
     /**
      * Deletes the document with the id
      * @param {string} query ObjectId of the document to be deleted
-     * @param {ClientSession} session An optional mongoose client session, required if the operation is in a transaction
-     * @returns {Promise<TDocument>} A promise resolving to the deleted document.
+     *  @param {IQueryOptions} options An optional object containing parameters that can be passed to the mongoose query
     */
     public deleteById(id:string, session?:ClientSession): Promise<TDocument> {
         try {

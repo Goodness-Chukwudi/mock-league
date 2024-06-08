@@ -61,7 +61,7 @@ class AdminFixtureController extends BaseApiController {
                     referee: body.referee,
                     created_by: user.id
                 };
-                const fixture = await fixtureRepository.save(fixtureData, session);
+                const fixture = await fixtureRepository.save(fixtureData, {session});
 
                 //remove cached data to trigger a refetch from db on next request
                 await deleteCachedData([FIXTURES_KEY, PENDING_FIXTURES_KEY]);
@@ -98,7 +98,7 @@ class AdminFixtureController extends BaseApiController {
                     { path: "created_by", select: "first_name middle_name last_name" }
                 ];
 
-                const fixture = await fixtureRepository.findByIdAndPopulate(req.params.id, populatedFields);
+                const fixture = await fixtureRepository.findByIdAndPopulate(req.params.id, {populatedFields});
                 if (!fixture) {
                     const error = new Error("Fixture not found");
                     return this.sendErrorResponse(res, error, resourceNotFound("Fixture"), 404) 
@@ -127,7 +127,7 @@ class AdminFixtureController extends BaseApiController {
                     "away_team.score": body.away_team_score,
                     status: body.status
                 }
-                const updatedFixture = await fixtureRepository.updateById(req.params.id, update, session);
+                const updatedFixture = await fixtureRepository.updateById(req.params.id, update, {session});
 
                 if (!updatedFixture) {
                     const error = new Error("Fixture not found");

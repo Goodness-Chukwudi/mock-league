@@ -36,7 +36,7 @@ export class AuthMiddleware extends BaseRouterMiddleware {
 
                 if (!sessionData) {
                     const query = {_id: payload.loginSession, user: payload.user, status: BIT.ON };
-                    let loginSession = await loginSessionRepository.findOneAndPopulate(query, ["user"]);
+                    let loginSession = await loginSessionRepository.findOneAndPopulate(query, { populatedFields: ["user"] });
 
                     if (!loginSession) {
                         const error =  new Error("Unable to validate user from token");

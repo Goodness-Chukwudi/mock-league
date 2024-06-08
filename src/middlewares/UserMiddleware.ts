@@ -25,7 +25,7 @@ class UserMiddleware extends BaseRouterMiddleware {
             return this.sendErrorResponse(res, error, errorMessage.requiredField("Email"), 400);
         }
 
-        passwordRepository.findOneAndPopulate({email: email, status: PASSWORD_STATUS.ACTIVE}, ["user"])
+        passwordRepository.findOneAndPopulate({email: email, status: PASSWORD_STATUS.ACTIVE}, { populatedFields: ["user"] })
             .then((password) => {
                 if (!password) {
                     return this.sendErrorResponse(res, new Error("User not found"), errorMessage.INVALID_LOGIN, 400)

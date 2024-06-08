@@ -78,7 +78,7 @@ class AdminTeamController extends BaseApiController {
                     { path: "created_by", select: "first_name middle_name last_name" }
                 ];
 
-                const team = await teamRepository.findByIdAndPopulate(req.params.id, populatedFields);
+                const team = await teamRepository.findByIdAndPopulate(req.params.id, { populatedFields });
                 if (!team) {
                     const error = new Error("Team not found");
                     return this.sendErrorResponse(res, error, resourceNotFound("Team"), 404) 
@@ -103,7 +103,7 @@ class AdminTeamController extends BaseApiController {
                     stadium,
                     status
                 }
-                const updatedTeam = await teamRepository.updateById(req.params.id, update, session);
+                const updatedTeam = await teamRepository.updateById(req.params.id, update, {session});
 
                 if (!updatedTeam) {
                     const error = new Error("Team not found");
