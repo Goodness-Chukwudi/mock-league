@@ -1,5 +1,4 @@
 import joi, { Extension, Root } from "joi";
-import { Types } from "mongoose";
 
 interface IResponseMessage {
     response_code: number;
@@ -33,24 +32,6 @@ interface PaginatedDocument<T> {
     }
 }
 
-interface InsertManyResult {
-    acknowledged: boolean;
-    insertedIds: Types.ObjectId[]
-}
-
-interface UpdateManyResult {
-    acknowledged: boolean;
-    matchedCount: number;
-    modifiedCount: number;
-    upsertedCount: number;
-    upsertedId: Types.ObjectId[]
-}
-
-interface DeleteResult {
-    acknowledged: boolean;
-    deletedCount: number;
-}
-
 interface AuthTokenPayload {
     user: string;
     loginSession: string
@@ -60,8 +41,5 @@ export {
     IResponseMessage,
     JoiExtensionFactory,
     PaginatedDocument,
-    InsertManyResult,
-    UpdateManyResult,
-    DeleteResult,
     AuthTokenPayload
 }
