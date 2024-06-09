@@ -21,11 +21,11 @@ const returnHtmlForUniqueFixtureLink = async (req: Request, res: Response) => {
         const kickoff = fixture.time_started || fixture.kick_off;
         const fixtureHtml = `
         <div style="font-size: larger; padding-top: 8vh; margin: 20px auto; text-align: center; background-color: #082785; color: #ffffff; width: 70vw; height: 50vh;">
-            <h1>${fixture.home_team.name}   ${fixture.home_team.score} - ${fixture.away_team.score}   ${fixture.away_team.name}</h1>
-            <p><b>Venue: </b> ${fixture.venue}</p>
-            <p><b>Kick Off: </b> ${kickoff.toUTCString()}</p>
-            <p><b>Referee: </b> ${fixture.referee}</p>
-            <p><b>Status: </b> ${fixture.status}</p>
+            <h1>${fixture.home_team.name} ${fixture.home_team.score} - ${fixture.away_team.score} ${fixture.away_team.name}</h1>
+            <p><b>Venue:</b> ${fixture.venue}</p>
+            <p><b>Kick Off:</b> ${kickoff.toUTCString()}</p>
+            <p><b>Referee:</b> ${fixture.referee}</p>
+            <p><b>Status:</b> ${fixture.status}</p>
         </div>`
         
         res.status(200).send(fixtureHtml)

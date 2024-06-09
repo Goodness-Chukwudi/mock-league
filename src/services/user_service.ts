@@ -65,9 +65,9 @@ const createSuperAdminUser = async () => {
         const existingSuperAdmin = await privilegeRepository.findOne({status: ITEM_STATUS.ACTIVE, role: USER_ROLES.SUPER_ADMIN});
         if (!existingSuperAdmin) {
             const userData = {
-                first_name: "John",
-                last_name: "Doe",
-                email: "johndoe@gmail.com",
+                first_name: "Super",
+                last_name: "Admin",
+                email: "super.admin@gmail.com",
                 phone: "070435343453",
                 gender: "male"
             }

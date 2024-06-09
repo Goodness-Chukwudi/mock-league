@@ -30,7 +30,7 @@ class Logger {
             new winston.transports.MongoDB({
                 db: Env.MONGODB_URI,
                 options: {
-                    dbName: "mock-league-logs",
+                    dbName: "gomoney_mock_league_logs",
                     // useNewUrlParser: true,
                     // useUnifiedTopology: true,
                 },

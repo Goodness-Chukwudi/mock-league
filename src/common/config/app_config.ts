@@ -24,7 +24,7 @@ const PaginationCustomLabels = {
 };
 
 const DbConfig = {
-  dbName: "gomoney-test",
+  dbName: "gomoney_mock_league",
   // useNewUrlParser: true,
   // useUnifiedTopology: true,
   maxPoolSize: 100
