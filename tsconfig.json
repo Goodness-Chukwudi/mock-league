@@ -3,14 +3,14 @@
   "include": ["src"],
   "exclude": ["node_modules"],
   "compilerOptions": {
-    "module": "commonjs",
+    "module": "CommonJS",
     "esModuleInterop": true,
     "target": "es6",
-    "moduleResolution": "node",
+    "moduleResolution": "Node",
     "sourceMap": true,
     "outDir": "dist",
     "strictPropertyInitialization": false,
     "allowSyntheticDefaultImports": true
   },
-  "lib": ["es2015"]
+  "lib": ["es6"]
 }

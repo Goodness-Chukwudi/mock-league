@@ -24,8 +24,8 @@ class AdminTeamController extends BaseApiController {
         this.addTeam("/"); //POST
         this.listTeams("/"); //GET
         this.viewTeam("/:id"); //GET
-        this.removeTeam("/:id"); //DELETE
         this.updateTeam("/:id"); //PATCH
+        this.removeTeam("/:id"); //DELETE
     }
 
     addTeam(path:string) {
@@ -75,7 +75,7 @@ class AdminTeamController extends BaseApiController {
         this.router.get(path, async (req, res) => {
             try {
                 const populatedFields = [
-                    { path: "created_by", select: "first_name middle_name last_name" }
+                    { path: "added_by", select: "first_name middle_name last_name" }
                 ];
 
                 const team = await teamRepository.findByIdAndPopulate(req.params.id, { populatedFields });

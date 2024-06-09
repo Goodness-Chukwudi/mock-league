@@ -41,7 +41,7 @@ class RequestUtils {
      * @returns {string[]} an array containing the assigned access roles of the logged in user.
     */
     getUserRoles() {
-        return this.response.locals.user_roles as string[];
+        return this.response.locals?.user_roles as string[] || [];
     }
 
     /**

@@ -7,8 +7,6 @@ import UserRoutes from "./routes/UserRoutes";
 import AdminRoutes from "./routes/AdminRoutes";
 import responseTime from "response-time";
 import { recordResponseTime } from "./common/utils/app_utils";
-import PublicController from "./controllers/PublicController";
-import { returnHtmlForUniqueFixtureLink } from "./services/fixture_service";
 import { redisSessionStore } from "./common/utils/redis";
 
 class App {
@@ -38,14 +36,13 @@ class App {
       this.adminRoutes = new AdminRoutes(this.app);
       
       this.app.get("/", (req, res) => res.status(200).send("<h1>Successful</h1>"));
-      this.app.get("/:fixture_url_id", returnHtmlForUniqueFixtureLink);
-
+      
       this.app.get(Env.API_PATH + "/health", (req, res) => {
         const response = "Server is healthy____   " + new Date().toUTCString();
         res.status(200).send(response);
-      });
-
-      this.app.use(Env.API_PATH, PublicController);
+        });
+        
+      //Expose routes
       this.adminRoutes.initializeRoutes();
       this.userRoutes.initializeRoutes();
 

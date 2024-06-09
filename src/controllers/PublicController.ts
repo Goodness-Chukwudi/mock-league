@@ -94,6 +94,7 @@ class PublicController extends BaseApiController {
                 userPrivileges.forEach(privilege => {
                     roles.push(privilege.role);
                 })
+
                 req.session.data = { user, login_session: loginSession, user_roles: roles };
 
                 const response = {

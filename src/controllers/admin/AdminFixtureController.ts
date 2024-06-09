@@ -4,7 +4,7 @@ import { UNABLE_TO_COMPLETE_REQUEST, resourceNotFound } from "../../common/const
 import { teamRepository } from "../../services/team_service";
 import FixtureValidator from "../../middlewares/validators/FixtureValidator";
 import { fixtureRepository } from "../../services/fixture_service";
-import { nanoid } from "nanoid";
+import { v4 as uuidv4 } from 'uuid';
 import Env from "../../common/config/environment_variables";
 import { deleteCachedData, getCachedData, setCachedData } from "../../common/utils/redis";
 import { createMongooseTransaction } from "../../common/utils/app_utils";
@@ -28,9 +28,9 @@ class AdminFixtureController extends BaseApiController {
         this.addFixture("/"); //POST
         this.listFixtures("/"); //GET
         this.viewFixture("/:id"); //GET
-        this.removeFixture("/:id"); //DELETE
         this.updateFixture("/:id"); //PATCH
         this.generateFixtureUrl("/:id"); //POST
+        this.removeFixture("/:id"); //DELETE
     }
 
     addFixture(path:string) {
@@ -54,7 +54,7 @@ class AdminFixtureController extends BaseApiController {
                 }
  
                 const fixtureData = {
-                    venue: body.venue,
+                    venue: homeTeam.stadium,
                     kick_off: body.kick_off,
                     home_team: { name: homeTeam.name, team: homeTeam.id },
                     away_team: { name: awayTeam.name, team: awayTeam.id },
@@ -151,15 +151,25 @@ class AdminFixtureController extends BaseApiController {
     generateFixtureUrl(path:string) {
         this.router.post(path, async (req, res) => {
             try {
-                const id = nanoid(); //uniques 21 digits string     
-                const fixtureLink = `${Env.APP_URL}/${id}`;
-                
-                const updatedFixture = await fixtureRepository.updateById(req.params.id, {url_id: id});
 
-                if (!updatedFixture) {
+                const fixture = await fixtureRepository.findById(req.params.id);
+                if (!fixture) {
                     const error = new Error("Fixture not found");
                     return this.sendErrorResponse(res, error, resourceNotFound("Fixture"), 404) 
                 }
+
+                let fixtureLink = "";
+
+                if (fixture.url_id) {
+                    fixtureLink = `${Env.APP_URL}/${fixture.url_id}`;
+                    return this.sendSuccessResponse(res, fixtureLink);
+                }
+
+                const id = uuidv4(); 
+                fixture.url_id = id;
+                await fixture.save();
+
+                fixtureLink = `${Env.APP_URL}/${id}`;
 
                 this.sendSuccessResponse(res, fixtureLink);
             } catch (error:any) {

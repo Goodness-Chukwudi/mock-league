@@ -18,7 +18,7 @@ export class AuthMiddleware extends BaseRouterMiddleware {
     }
 
     public authGuard = (req: Request, res: Response, next: any) => {
-        
+
         const jwt = getTokenFromRequest(req);
         
         verifyJwtToken(jwt, async (error, decoded) => {

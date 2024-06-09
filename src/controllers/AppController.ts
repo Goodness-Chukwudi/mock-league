@@ -11,6 +11,9 @@ import { teamRepository } from "../services/team_service";
 import { fixtureRepository } from "../services/fixture_service";
 import { privilegeRepository } from "../services/user_privilege_service";
 import { getCachedData, setCachedData } from "../common/utils/redis";
+import { UpdateQuery } from "mongoose";
+import { ILoginSession } from "../models/login_session";
+import { loginSessionRepository } from "../services/login_session_service";
 
 class AppController extends BaseApiController {
     private appValidator: AppValidator;
@@ -97,18 +100,20 @@ class AppController extends BaseApiController {
         this.router.patch(path, async (req, res) => {
             try {
                 const activeLoginSession = this.requestUtils.getLoginSession();
-    
+                const update:UpdateQuery<ILoginSession> = {};
+                
                 if (activeLoginSession.validity_end_date > new Date()) {
-                    activeLoginSession.logged_out = true;
-                    activeLoginSession.validity_end_date = new Date();
+                    update.logged_out = true;
+                    update.validity_end_date = new Date();
                 } else {
-                    activeLoginSession.expired = true
+                    update.expired = true
                 }
 
-                activeLoginSession.status = BIT.OFF;
-                await activeLoginSession.save();
+                update.status = BIT.OFF;
+                await loginSessionRepository.updateById(activeLoginSession.id, update);
+
+                req.session.destroy(() => {});
                 this.sendSuccessResponse(res);
-    
             } catch (error: any) {
                 this.sendErrorResponse(res, error, UNABLE_TO_COMPLETE_REQUEST, 500);
             }

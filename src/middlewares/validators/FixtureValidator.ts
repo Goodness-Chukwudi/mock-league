@@ -17,7 +17,6 @@ class TeamValidator extends BaseRouterMiddleware {
     validateFixture = async ( req: Request, res: Response, next: NextFunction ) => {
         try {
             const BodySchema = Joi.object({
-                venue: Joi.string().max(255).required(),
                 kick_off: Joi.date().required(),
                 home_team: JoiId.string().objectId().required(),
                 away_team: JoiId.string().objectId().required(),

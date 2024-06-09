@@ -32,7 +32,7 @@ const redisSessionStore = () => {
 
 const setCachedData = async (key: string, data: any) => {
     try {
-        await redisClient.setEx(key, 3600, data)
+        await redisClient.setEx(key, 3600, JSON.stringify(data))
     } catch (error) {
         throw error;
     }
