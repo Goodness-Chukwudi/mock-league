@@ -49,9 +49,9 @@ class TeamValidator extends BaseRouterMiddleware_1.default {
         this.validateTeamUpdate = (req, res, next) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const BodySchema = joi_1.default.object({
-                    name: joi_1.default.string().max(255).required(),
-                    slogan: joi_1.default.string().max(255).required(),
-                    stadium: joi_1.default.string().max(255).required(),
+                    name: joi_1.default.string().max(255),
+                    slogan: joi_1.default.string().max(255),
+                    stadium: joi_1.default.string().max(255),
                     status: joi_1.default.string().valid(...Object.values(enum_1.TEAM_STATUS))
                 });
                 yield BodySchema.validateAsync(req.body, app_config_1.JoiValidatorOptions);

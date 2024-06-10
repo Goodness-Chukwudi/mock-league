@@ -43,9 +43,9 @@ class TeamValidator extends BaseRouterMiddleware {
     validateTeamUpdate = async ( req: Request, res: Response, next: NextFunction ) => {
         try {
             const BodySchema = Joi.object({
-                name: Joi.string().max(255).required(),
-                slogan: Joi.string().max(255).required(),
-                stadium: Joi.string().max(255).required(),
+                name: Joi.string().max(255),
+                slogan: Joi.string().max(255),
+                stadium: Joi.string().max(255),
                 status: Joi.string().valid(...Object.values(TEAM_STATUS))
 
             });

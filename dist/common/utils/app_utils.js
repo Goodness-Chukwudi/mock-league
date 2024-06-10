@@ -11,10 +11,10 @@ const rate_limit_redis_1 = require("rate-limit-redis");
 const redis_1 = __importDefault(require("./redis"));
 const rateLimiter = () => {
     const limiter = (0, express_rate_limit_1.default)({
-        // windowMs: 10 * 1000, // 10 seconds
-        // limit: 1, // 1 request per 10 seconds
-        windowMs: 60 * 60 * 1000, // 1 hour
-        limit: 100, // 100 requests per hour
+        windowMs: 10 * 1000, // 10 seconds
+        limit: 1, // 1 request per 10 seconds
+        // windowMs: 60 * 60 * 1000, // 1 hour
+        // limit: 100, // 100 requests per hour
         legacyHeaders: false,
         store: new rate_limit_redis_1.RedisStore({
             sendCommand: (...args) => redis_1.default.sendCommand(args)

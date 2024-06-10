@@ -4,13 +4,12 @@
     "description": "An API that serves the latest scores of fixtures of matches in a 'Mock Premier League'",
     "main": "dist/index.js",
     "scripts": {
-        "start": "npm run build & node ./dist/index.js",
-        "docker_start": "npm run build && pm2 kill && pm2-runtime start ./dist/index.js && pm2 monit",
+        "serve": "npm run build & node ./dist/index.js",
+        "start": "npm run build && pm2 kill && pm2-runtime start ./dist/index.js && pm2 monit",
         "lint": "eslint . --ext .ts",
         "test": "jest",
         "ts-node": "ts-node --transpileOnly ./src/index.ts",
         "dev": "./node_modules/nodemon/bin/nodemon.js -e ts  --exec \"npm run lint && npm run ts-node\"",
-        "watch": "./node_modules/nodemon/bin/nodemon.js -e ts  --exec \"npm run build && npm run dev_start\"",
         "build": "npm run lint && tsc"
     },
     "repository": {
