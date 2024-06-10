@@ -1,0 +1,1 @@
+{"version":3,"file":"user_privilege_service.js","sourceRoot":"","sources":["../../src/services/user_privilege_service.ts"],"names":[],"mappings":";;;;;;AAAA,wDAAgC;AAChC,8EAAuH;AAEvH,MAAM,mBAAoB,SAAQ,iBAAqE;IAEnG;QACI,KAAK,CAAC,wBAAa,CAAC,CAAC;IACzB,CAAC;CACJ;AAED,MAAM,mBAAmB,GAAG,IAAI,mBAAmB,EAAE,CAAC;AAG7C,kDAAmB;AAD5B,kBAAe,mBAAmB,CAAC"}

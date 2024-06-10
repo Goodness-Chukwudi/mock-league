@@ -1,0 +1,20 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.COMPLETED_FIXTURES_KEY = exports.PENDING_FIXTURES_KEY = exports.FIXTURES_KEY = exports.TEAMS_KEY = exports.LOGIN_SESSION_LABEL = exports.USER_PASSWORD_LABEL = exports.USER_ROLES_LABEL = exports.USER_LABEL = void 0;
+const USER_LABEL = "user";
+exports.USER_LABEL = USER_LABEL;
+const USER_ROLES_LABEL = "user_roles";
+exports.USER_ROLES_LABEL = USER_ROLES_LABEL;
+const USER_PASSWORD_LABEL = "user_password";
+exports.USER_PASSWORD_LABEL = USER_PASSWORD_LABEL;
+const LOGIN_SESSION_LABEL = "login_session";
+exports.LOGIN_SESSION_LABEL = LOGIN_SESSION_LABEL;
+const TEAMS_KEY = "teams";
+exports.TEAMS_KEY = TEAMS_KEY;
+const FIXTURES_KEY = "fixtures";
+exports.FIXTURES_KEY = FIXTURES_KEY;
+const PENDING_FIXTURES_KEY = "pending_fixtures";
+exports.PENDING_FIXTURES_KEY = PENDING_FIXTURES_KEY;
+const COMPLETED_FIXTURES_KEY = "completed_fixtures";
+exports.COMPLETED_FIXTURES_KEY = COMPLETED_FIXTURES_KEY;
+//# sourceMappingURL=app_constants.js.map

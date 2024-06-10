@@ -7,4 +7,4 @@ RUN npm install
 RUN npm install pm2 -g
 EXPOSE ${PORT}
 
-CMD ["npm", "start"]
+CMD ["npm", "docker_start"]
