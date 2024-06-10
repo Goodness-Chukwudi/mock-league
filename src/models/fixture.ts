@@ -1,4 +1,5 @@
 import { Document, Schema, Types, model} from "mongoose";
+import mongoosePagination from "mongoose-paginate-v2";
 import { FIXTURE_STATUS } from "../data/enums/enum";
 import MODEL_NAMES from "../data/model_names";
 import { IUserDocument } from "./user";
@@ -50,6 +51,8 @@ interface ICreateFixture {
 }
 
 interface IFixture extends Required<ICreateFixture> {};
+
+FixtureSchema.plugin(mongoosePagination);
 
 const Fixture = model<IFixture>(MODEL_NAMES.FIXTURE, FixtureSchema);
 interface IFixtureDocument extends IFixture, Document {_id: Types.ObjectId};

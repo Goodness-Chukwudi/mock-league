@@ -131,7 +131,8 @@ class PublicController extends BaseApiController {
                 if (reqQuery.limit) limit = Number(reqQuery.limit);
                 if (reqQuery.page) page = Number(reqQuery.page);
 
-                const teams = await teamRepository.paginate(query, { limit, page });
+                const selectedFields = "-created_at -updated_at -added_by";
+                const teams = await teamRepository.paginate(query, { limit, page, selectedFields });
         
                 this.sendSuccessResponse(res, teams);
             } catch (error:any) {
@@ -168,7 +169,8 @@ class PublicController extends BaseApiController {
                 if (reqQuery.limit) limit = Number(reqQuery.limit);
                 if (reqQuery.page) page = Number(reqQuery.page);
 
-                const fixtures = await fixtureRepository.paginate(query, { limit, page });
+                const selectedFields = "-created_at -updated_at -created_by";
+                const fixtures = await fixtureRepository.paginate(query, { limit, page, selectedFields });
         
                 this.sendSuccessResponse(res, fixtures);
             } catch (error:any) {

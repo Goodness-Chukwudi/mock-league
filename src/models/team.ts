@@ -1,4 +1,5 @@
 import { Document, Schema, Types, model} from "mongoose";
+import mongoosePagination from "mongoose-paginate-v2";
 import { TEAM_STATUS } from "../data/enums/enum";
 import MODEL_NAMES from "../data/model_names";
 import { IUserDocument } from "./user";
@@ -25,6 +26,8 @@ interface ICreateTeam {
 }
 
 interface ITeam extends Required<ICreateTeam> {};
+
+TeamSchema.plugin(mongoosePagination);
 
 const Team = model<ITeam>(MODEL_NAMES.TEAM, TeamSchema);
 interface ITeamDocument extends ITeam, Document {_id: Types.ObjectId};

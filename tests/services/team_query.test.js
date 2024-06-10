@@ -1,6 +1,6 @@
 const { faker } = require("@faker-js/faker");
 const { teamRepository } = require("../../src/services/team_service");
-const { TEAM_STATUS } = require("../../src/data/enums/enum")
+const { TEAM_STATUS } = require("../../src/data/enums/enum");
 
 let team = null;
 
