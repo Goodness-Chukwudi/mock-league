@@ -7,10 +7,10 @@ import redisClient from "./redis"
 
 const rateLimiter = () => {
     const limiter = rateLimit({
-        // windowMs: 10 * 1000, // 10 seconds
-        // limit: 1, // 1 request per 10 seconds
-        windowMs: 60 * 60 * 1000, // 1 hour
-        limit: 100, // 100 requests per hour
+        windowMs: 10 * 1000, // 10 seconds
+        limit: 1, // 1 request per 10 seconds
+        // windowMs: 60 * 60 * 1000, // 1 hour
+        // limit: 100, // 100 requests per hour
         legacyHeaders: false,
         store: new RedisStore({
             sendCommand: (...args: string[]) => redisClient.sendCommand(args)
